@@ -1,4 +1,4 @@
-name: Validate rebased sccache 0.19.0 on native Termux ARM64
+name: Validate in-process sccache 0.19.0 on native Termux ARM64
 
 on:
   push:
