@@ -1,4 +1,4 @@
-name: ReBroad Termux APT build and publish
+name: ReBroad Termux APT build and stage
 
 on:
   push:
@@ -6,7 +6,6 @@ on:
     paths:
       - packages/sccache/build.sh
       - packages/htop/build.sh
-      - scripts/rebroad-publish-apt.sh
       - .github/workflows/rebroad-sccache-apt.yml
   workflow_dispatch:
 
@@ -26,19 +25,15 @@ jobs:
         run: docker build --tag ghcr.io/termux/package-builder:latest scripts/
 
       - name: Lint sccache recipe
-        shell: bash
         run: ./scripts/lint-packages.sh packages/sccache/build.sh
 
       - name: Lint htop recipe
-        shell: bash
         run: ./scripts/lint-packages.sh packages/htop/build.sh
 
-      - name: Build ReBroad sccache for native Termux aarch64
-        shell: bash
+      - name: Build sccache for native Termux aarch64
         run: ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 sccache
 
-      - name: Build ReBroad htop for native Termux aarch64
-        shell: bash
+      - name: Build htop for native Termux aarch64
         run: ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 htop
 
       - name: Collect and validate Debian packages
@@ -61,7 +56,7 @@ jobs:
           [[ "$(dpkg-deb --field dist/htop_3.6.0-dev+rebroad1_aarch64.deb Version)" == "3.6.0-dev+rebroad1" ]]
           sha256sum dist/*.deb
 
-      - name: Save native Termux packages
+      - name: Save native Termux packages for staging
         uses: actions/upload-artifact@v4
         with:
           name: rebroad-termux-aarch64
@@ -69,70 +64,51 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-  publish-apt:
+  stage-apt:
     needs: [build-aarch64]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      actions: read
     steps:
-      - name: Check configured archive signing key
-        id: signing
-        shell: bash
-        env:
-          APT_PRIVATE_KEY: ${{ secrets.REBROAD_APT_GPG_PRIVATE_KEY }}
-          APT_PASSPHRASE: ${{ secrets.REBROAD_APT_GPG_PASSPHRASE }}
-        run: |
-          if [[ -n "$APT_PRIVATE_KEY" && -n "$APT_PASSPHRASE" ]]; then
-            echo 'ready=true' >> "$GITHUB_OUTPUT"
-          else
-            echo "::error::Built native DEBs but cannot sign APT metadata. Configure the dedicated APT archive signing key secrets; the public APK test key is not suitable for repository signing."
-            exit 1
-          fi
-
-      - name: Check out signed APT feed
-        if: steps.signing.outputs.ready == 'true'
+      - name: Check out the existing APT feed
         uses: actions/checkout@v4
         with:
           ref: apt-repo
           path: apt-feed
-          persist-credentials: true
-
-      - name: Check out publishing script at the same source commit
-        if: steps.signing.outputs.ready == 'true'
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          path: source
-          persist-credentials: false
 
       - name: Download native Termux packages
-        if: steps.signing.outputs.ready == 'true'
         uses: actions/download-artifact@v4
         with:
           name: rebroad-termux-aarch64
           path: package
 
-      - name: Generate and sign APT package index
-        if: steps.signing.outputs.ready == 'true'
+      - name: Stage binaries in the APT pool
         working-directory: apt-feed
-        env:
-          REBROAD_APT_GPG_PRIVATE_KEY: ${{ secrets.REBROAD_APT_GPG_PRIVATE_KEY }}
-          REBROAD_APT_GPG_PASSPHRASE: ${{ secrets.REBROAD_APT_GPG_PASSPHRASE }}
-          PACKAGE_DIR: ${{ github.workspace }}/package
+        shell: bash
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq dpkg-dev gnupg
-          bash ../source/scripts/rebroad-publish-apt.sh
+          set -euo pipefail
+          for package in sccache htop; do
+            shopt -s nullglob
+            debs=("${GITHUB_WORKSPACE}/package/${package}"_*_aarch64.deb)
+            [[ "${#debs[@]}" -eq 1 ]] || { echo "Expected one ${package} package" >&2; exit 1; }
+            [[ "$(dpkg-deb --field "${debs[0]}" Package)" == "$package" ]]
+            [[ "$(dpkg-deb --field "${debs[0]}" Architecture)" == aarch64 ]]
+            first_letter="${package:0:1}"
+            pool="pool/main/$first_letter/$package"
+            mkdir -p "$pool"
+            rm -f "$pool"/"${package}"_*_aarch64.deb
+            cp -- "${debs[0]}" "$pool/"
+          done
 
-      - name: Publish APT feed
-        if: steps.signing.outputs.ready == 'true'
+      - name: Commit staged package binaries
         working-directory: apt-feed
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add dists pool
+          git add pool/main/s/sccache pool/main/h/htop
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Publish signed ReBroad Termux packages from ${GITHUB_SHA:0:12}"
+          git commit -m "Stage ReBroad sccache and htop ARM64 binaries"
           git push origin HEAD:apt-repo
