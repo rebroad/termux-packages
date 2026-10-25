@@ -6,7 +6,7 @@ set -euo pipefail
 : "${PACKAGE_DIR:?Missing PACKAGE_DIR}"
 : "${REBROAD_APT_GPG_PRIVATE_KEY:?Missing private key secret}"
 : "${REBROAD_APT_GPG_PASSPHRASE:?Missing private key passphrase secret}"
-expected_fpr="1ED97E796A59F08B22CE7CACFFF9DB83A50BE6C9"
+expected_fpr="D707B230D33E2AA09C0B979FAC3209C81372E53A"
 
 declare -A expected_versions=(
     [sccache]="0.19.0+rebroad1"
