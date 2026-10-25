@@ -70,8 +70,8 @@ jobs:
           if [[ -n "$APT_PRIVATE_KEY" && -n "$APT_PASSPHRASE" ]]; then
             echo 'ready=true' >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::Native DEB built; publishing awaits REBROAD_APT_GPG_PRIVATE_KEY and REBROAD_APT_GPG_PASSPHRASE secrets."
-            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo "::error::Built a native DEB but cannot publish APT metadata: configure REBROAD_APT_GPG_PRIVATE_KEY and REBROAD_APT_GPG_PASSPHRASE in Settings → Secrets and variables → Actions. Do not publish an unsigned index."
+            exit 1
           fi
 
       - name: Check out signed APT feed

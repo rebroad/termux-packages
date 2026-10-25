@@ -5,7 +5,7 @@ set -euo pipefail
 # Other Termux mirrors remain enabled and supply packages absent here.
 : "${PREFIX:=/data/data/com.termux/files/usr}"
 base="https://raw.githubusercontent.com/rebroad/termux-packages/apt-repo"
-key_sha256="781529826d4994690e2466a094bce31f53ae154c14c463accb1ff1ca18cc78eb"
+key_sha256="49f10af5d74a3e79508693d80a4ccaa9f86200ce654b6b853ac0ebade6577bfc"
 repo_key="$PREFIX/etc/apt/keyrings/rebroad.asc"
 list_file="$PREFIX/etc/apt/sources.list.d/rebroad.list"
 pin_file="$PREFIX/etc/apt/preferences.d/00-rebroad"
@@ -34,6 +34,6 @@ Pin: release o=ReBroad
 Pin-Priority: 1001
 EOF
 echo "Enabled signed ReBroad APT feed with priority 1001 (official Termux mirrors remain enabled)."
-echo "Archive key fingerprint: D707B230D33E2AA09C0B979FAC3209C81372E53A"
+echo "Archive key fingerprint: 1ED97E796A59F08B22CE7CACFFF9DB83A50BE6C9"
 apt-get update
 apt-cache policy sccache
