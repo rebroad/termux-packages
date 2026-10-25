@@ -1,0 +1,60 @@
+name: Publish verified ReBroad sccache Debian package
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - .github/workflows/publish-rebroad-sccache-deb.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release-sccache-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download pinned successful ARM64 sccache build
+        uses: actions/download-artifact@v4
+        with:
+          name: rebroad-sccache-aarch64
+          path: dist
+          run-id: 40184510801
+          repository: rebroad/termux-packages
+          github-token: ${{ github.token }}
+
+      - name: Verify byte-for-byte identity and native Termux metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          deb='dist/sccache_0.18.0+rebroad1_aarch64.deb'
+          test -s "$deb"
+          echo '5bd444388daecc327aa1bb311d3b94dfa49b55ad0b96df9f729796b7f6ce8e74  dist/sccache_0.18.0+rebroad1_aarch64.deb' | sha256sum --check
+          [[ "$(dpkg-deb --field "$deb" Package)" == 'sccache' ]]
+          [[ "$(dpkg-deb --field "$deb" Version)" == '0.18.0+rebroad1' ]]
+          [[ "$(dpkg-deb --field "$deb" Architecture)" == 'aarch64' ]]
+          mkdir -p check
+          dpkg-deb --extract "$deb" check
+          file check/data/data/com.termux/files/usr/bin/sccache | grep -Fq 'ARM aarch64'
+          readelf -l check/data/data/com.termux/files/usr/bin/sccache | grep -Fq '/system/bin/linker64'
+          rm -rf check
+
+      - name: Publish standalone verified DEB while signed APT indexing awaits key configuration
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag='sccache-0.18.0-rebroad.1-aarch64'
+          filename='dist/sccache_0.18.0+rebroad1_aarch64.deb'
+          notes='Native Android ARM64 sccache 0.18.0+rebroad1 from rebroad/sccache rust-incremental-snapshots at commit 1570d050233a77718c24ba0e27d702760adc01f4. Experimental Rust incremental snapshot feature; Android smoke testing not yet completed. Direct DEB download only until the separately signed ReBroad APT index is published. SHA256: 5bd444388daecc327aa1bb311d3b94dfa49b55ad0b96df9f729796b7f6ce8e74.'
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$filename" --clobber
+          else
+            gh release create "$tag" "$filename" --target 1d1ea4705c12bb7b582f5d60aec6338da45f6ba5 \
+              --title 'ReBroad sccache 0.18.0+rebroad1 (Android arm64)' \
+              --notes "$notes"
+          fi
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fxq 'sccache_0.18.0+rebroad1_aarch64.deb'
