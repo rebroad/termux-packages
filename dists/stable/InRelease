@@ -5,24 +5,26 @@ Origin: ReBroad
 Label: ReBroad Termux
 Suite: stable
 Codename: stable
-Date: Sun, 25 Oct 2026 12:31:46 GMT
+Date: Sun, 25 Oct 2026 19:39:46 GMT
 Architectures: aarch64
 Components: main
 Description: ReBroad Termux native packages
 SHA256:
- 2069146dfec4ef5c811f3d8d1f2c3574e32bca4a1eed222c9160baf0cbd08782              497 main/binary-aarch64/Packages
- 5903dc47fc5e72185bd983d5383e9473ff1a9fe3804ef38731c2e97da98af5c9              351 main/binary-aarch64/Packages.gz
+ 260aa840a557d4b020c6b117192c69d0a9f27a9b5671349a0c1becc6d80b2ab2             1037 main/binary-aarch64/Packages
+ ea91ad1f9b52253f4024e4b0a51cda6eda4d555ff77588031f1a6e0183dac707              571 main/binary-aarch64/Packages.gz
+
 -----BEGIN PGP SIGNATURE-----
 
-iQGzBAEBCgAdFiEEHtl+eWpZ8Isiznys//nbg6UL5skFAmrd9rIACgkQ//nbg6UL
-5slKYgwAju0b/AXJRTLXu8ucmhTfj3CNTdfRbfz3Z/HNv/uR/rxilZKOXDEbTAXh
-SDFShXZkMcWmV+siFWLzxa4DezKK6ydYeyK6/9VuHD0Oo9xu12OdCmpYOOJuYpx0
-lZrkKQNALvLu/J+0MlznafnDK/WB8rSuyrjYilZoJ4mXOiY6wCqEMkyoEAOWwWKD
-lq8lRbyIvrMNnXsD9VGKazurZeKySJ+fSaSbuf3VJ3nVVIvoaDQ1CB2DVTELIC7S
-ehrYWh5BkBCJs3qRrZBdYQpvaR+s/kePOsIoCGybJUzJ7/SCZbmOIQn4IzkHWEQP
-wfH1gyX29iqwmE7udIveWkfJN9s2ZGEPvIWyE4sEuz0xqBRJeH+aVR8hiZwyWz30
-TT52ZsXbpPqsuCcGvVL6RcOZsZhzYyQlZPnjqgiW1uzhzdiOyo4heDVt2vz88XSc
-hXvOADNu1sUBH7d9jh1rFq80QOfjJ+rXs+44Vv65qvdkzXntQc9MUcFzRH5/qysN
-aszKMJof
-=6fD5
+wsE7BAEBCgBvBYJq3lsHCRCigTy6fay2H0cUAAAAAAAeACBzYWx0QG5vdGF0aW9u
+cy5zZXF1b2lhLXBncC5vcmdibFvC10fIGnBQ0yFJZehAMxIQD3OogD4k+iY+1BXM
+/hYhBAMA9BEtb13Dj9GqS6KBPLp9rLYfAACrswv/W+6+IguYGbwdDOdIeCPuNvsd
+/DzRX6BBOSjHHyAjGV9TBC7b3IoyC4u9YZuCTmBQR3/f8/p3BGuWueRaoIwpZ5L3
+zOLCu0d+ZmHxP16lPTvrbY9Vx4d8JCU7giu4NT5qD/YfjGiYUwxZDIkKTU1kc1zK
+7DwW8x0t8nodNLoKDVHVJshqNEGTzlYKdZZEnuykhsXhDW7vZ34+Jfv7EptBGzaP
+0uWbdreu6+9fsNoUsJ62xlk0I1V9UMUs+DHq08JP7IYUfALNGymQ5FI1DUQzOlfb
+bpmMwQ7rcc9qW/1Nomnyw/Fo505l7OWLglwc58bKA84AzyW8g3R8vB+pF1tVgqkJ
+NbMUzY+O8pBKGJCjPZzpzQOV+vwck+OVkuJBQaUkJKS1lCy1fYLfFjmvCA2tTSqs
+NOmNq9pWzlQbYRL7czqeyUbSJQh+1uTIfsHylWTTLMHTfGjbDPNXd7GVBY8NIXQE
+p4tXY/+f7Cd2ms5RNjQxyfm3oX/zXKpUWjkLmD5d
+=emwS
 -----END PGP SIGNATURE-----

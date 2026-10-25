@@ -1,14 +1,31 @@
-Package: sccache
-Version: 0.18.0+rebroad1
+Package: htop
+Version: 3.6.0-dev+rebroad1-0
 Architecture: aarch64
 Maintainer: @rebroad
-Installed-Size: 17496
+Installed-Size: 432
+Depends: libandroid-support, ncurses
+Conflicts: htop-legacy
+Breaks: htop-legacy
+Replaces: htop-legacy
+Filename: pool/main/h/htop/htop_3.6.0-dev+rebroad1-0_aarch64.deb
+Size: 131760
+MD5sum: d84e7e1187e5cbedebfc392106e04ee8
+SHA1: d07074325e19404d90b506d415e80e828e8b4e7e
+SHA256: 3bb46f0640b50b5f0d8bdc335274df3c4d354d971ed945c96f366d087215f453
+Homepage: https://github.com/rebroad/htop
+Description: Interactive process viewer for Linux (ReBroad fork)
+
+Package: sccache
+Version: 0.19.0+rebroad1
+Architecture: aarch64
+Maintainer: @rebroad
+Installed-Size: 17396
 Depends: openssl
-Filename: pool/main/s/sccache/sccache_0.18.0+rebroad1_aarch64.deb
-Size: 5656856
-MD5sum: b975f551367a282e21d71c15b3d75e4d
-SHA1: b3a02ceb5ca86d586c96168eb533545bff6378ed
-SHA256: 5bd444388daecc327aa1bb311d3b94dfa49b55ad0b96df9f729796b7f6ce8e74
+Filename: pool/main/s/sccache/sccache_0.19.0+rebroad1_aarch64.deb
+Size: 5635640
+MD5sum: 1c90ee72a8f9384b88471e72a356fc80
+SHA1: f63d30d65bad44632b5505f30bc4358e5aadd163
+SHA256: d6c3ee8b6a431b713a386bdc40ee7d465485e30b42db07f9fc9e468226057911
 Homepage: https://github.com/rebroad/sccache
-Description: ReBroad sccache build cache with experimental Rust incremental snapshots
+Description: ReBroad sccache with daemon-free in-process cache access
 
