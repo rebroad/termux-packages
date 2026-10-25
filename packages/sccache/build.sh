@@ -12,18 +12,18 @@ TERMUX_PKG_BUILD_IN_SRC=true
 # A moving Git branch is not a reproducible package source. The build must
 # exactly match the reviewed ReBroad incremental-snapshots source revision.
 termux_step_post_get_source() {
-    local actual
-    actual=$(git -C "$TERMUX_PKG_SRCDIR" rev-parse HEAD)
-    if [[ "$actual" != "1570d050233a77718c24ba0e27d702760adc01f4" ]]; then
-        termux_error_exit "ReBroad sccache source changed: expected 1570d050233a77718c24ba0e27d702760adc01f4, got $actual"
-    fi
+	local actual
+	actual=$(git -C "$TERMUX_PKG_SRCDIR" rev-parse HEAD)
+	if [[ "$actual" != "1570d050233a77718c24ba0e27d702760adc01f4" ]]; then
+		termux_error_exit "ReBroad sccache source changed: expected 1570d050233a77718c24ba0e27d702760adc01f4, got $actual"
+	fi
 }
 
 termux_step_make() {
-    termux_setup_rust
-    cargo build --locked --jobs "$TERMUX_PKG_MAKE_PROCESSES" --target "$CARGO_TARGET_NAME" --release
+	termux_setup_rust
+	cargo build --locked --jobs "$TERMUX_PKG_MAKE_PROCESSES" --target "$CARGO_TARGET_NAME" --release
 }
 
 termux_step_make_install() {
-    install -Dm700 -t "$TERMUX_PREFIX/bin" "target/${CARGO_TARGET_NAME}/release/sccache"
+	install -Dm700 -t "$TERMUX_PREFIX/bin" "target/${CARGO_TARGET_NAME}/release/sccache"
 }

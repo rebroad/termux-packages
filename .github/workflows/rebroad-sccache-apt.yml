@@ -20,6 +20,14 @@ jobs:
       - name: Check out Termux package definitions
         uses: actions/checkout@v4
 
+      - name: Build matching Termux container with Android NDK r29
+        shell: bash
+        run: docker build --tag ghcr.io/termux/package-builder:latest scripts/
+
+      - name: Lint modified package recipe
+        shell: bash
+        run: ./scripts/lint-packages.sh packages/sccache/build.sh
+
       - name: Build ReBroad sccache for native Termux aarch64
         shell: bash
         run: ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 sccache
@@ -74,6 +82,14 @@ jobs:
           path: apt-feed
           persist-credentials: true
 
+      - name: Check out publishing script at the same source commit
+        if: steps.signing.outputs.ready == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: source
+          persist-credentials: false
+
       - name: Download native Termux sccache
         if: steps.signing.outputs.ready == 'true'
         uses: actions/download-artifact@v4
@@ -91,7 +107,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq dpkg-dev gnupg
-          bash <(curl --fail --location --silent --show-error             "https://raw.githubusercontent.com/rebroad/termux-packages/master/scripts/rebroad-publish-apt.sh")
+          bash ../source/scripts/rebroad-publish-apt.sh
       - name: Publish APT feed
         if: steps.signing.outputs.ready == 'true'
         working-directory: apt-feed
