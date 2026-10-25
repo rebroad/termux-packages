@@ -54,7 +54,8 @@ done
 export GNUPGHOME
 GNUPGHOME=$(mktemp -d)
 chmod 700 "$GNUPGHOME"
-apt_keyring=$(mktemp)\ntrap 'rm -rf -- "$GNUPGHOME"; rm -f -- "$apt_keyring"' EXIT
+apt_keyring=$(mktemp)
+trap 'rm -rf -- "$GNUPGHOME"; rm -f -- "$apt_keyring"' EXIT
 
 printf '%s\n' "$REBROAD_APT_GPG_PRIVATE_KEY" | gpg --batch --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" --import
 actual_fpr=$(gpg --with-colons --list-secret-keys | awk -F: '$1 == "fpr" {print $10; exit}')
@@ -100,9 +101,8 @@ gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPH
 gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" \
     --local-user "$expected_fpr" --output dists/stable/Release.gpg \
     --detach-sign dists/stable/Release
-gpg --batch --keyring "$script_dir/rebroad-keyring.gpg" --import "$script_dir/../rebroad-archive-key.asc"
-gpgv --keyring "$script_dir/rebroad-keyring.gpg" dists/stable/InRelease
-rm -f "$script_dir/rebroad-keyring.gpg"
+gpg --batch --no-default-keyring --keyring "$apt_keyring" --import ./rebroad-archive-key.asc
+gpgv --keyring "$apt_keyring" dists/stable/InRelease
 
 echo "Signed APT index for ${#package_names[@]} manifest-listed packages"
 sha256sum "${debs[@]}"
