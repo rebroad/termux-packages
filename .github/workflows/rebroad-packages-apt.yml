@@ -107,7 +107,16 @@ jobs:
             cp -- "${debs[0]}" "$pool/"
           done
 
-      - name: Regenerate and sign the APT index\n        working-directory: apt-feed\n        env:\n          PACKAGE_DIR: ${{ github.workspace }}/package\n          PACKAGE_MANIFEST: ${{ github.workspace }}/package-recipes/scripts/rebroad-upstream-packages.json\n          REBROAD_APT_GPG_PRIVATE_KEY: ${{ secrets.REBROAD_APT_GPG_PRIVATE_KEY }}\n          REBROAD_APT_GPG_PASSPHRASE: ${{ secrets.REBROAD_APT_GPG_PASSPHRASE }}\n        run: bash ../package-recipes/scripts/rebroad-publish-apt.sh\n\n      - name: Commit package binaries and signed APT index
+      - name: Regenerate and sign the APT index
+        working-directory: apt-feed
+        env:
+          PACKAGE_DIR: ${{ github.workspace }}/package
+          PACKAGE_MANIFEST: ${{ github.workspace }}/package-recipes/scripts/rebroad-upstream-packages.json
+          REBROAD_APT_GPG_PRIVATE_KEY: ${{ secrets.REBROAD_APT_GPG_PRIVATE_KEY }}
+          REBROAD_APT_GPG_PASSPHRASE: ${{ secrets.REBROAD_APT_GPG_PASSPHRASE }}
+        run: bash ../package-recipes/scripts/rebroad-publish-apt.sh
+
+      - name: Commit package binaries and signed APT index
         working-directory: apt-feed
         shell: bash
         run: |
