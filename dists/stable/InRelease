@@ -1,0 +1,28 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: ReBroad
+Label: ReBroad Termux
+Suite: stable
+Codename: stable
+Date: Sun, 25 Oct 2026 10:12:56 GMT
+Architectures: aarch64
+Components: main
+Description: ReBroad Termux native packages (experimental)
+SHA256:
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855                0 main/binary-aarch64/Packages
+ f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec               20 main/binary-aarch64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iQGzBAEBCgAdFiEE1weyMNM+KqCcC5efrDIJyBNy5ToFAmrd1igACgkQrDIJyBNy
+5To0BAv/cS81KlbscUMypuBhbLP7umGjYop2dOQRB86dzZAzQpfK4a/6Z4Y9VJeW
+gbNfg45jaILwLRFQYjjTRcVcjxhqqGI5/VVD0dizrWqD14knhecUJg5DPMyGzrwh
+PwWOcazLmylBo5yjA8ekWMZMxt1ge3zdf2Vy9Mwyu8qenX1GtIGVr84BtQsSXUg7
+vJ8GNiDjOhEvccS94eZ71mZMluYFRtdSwbr1Hg/6kyHwG7cwTE3dsFK8tHLAbx6g
+fbFYYo2dhnhR1ED5BXQuvMAFjqfvqzGTXfw+9fnMcBnLCwzYtGgvyeiexf3dyTMe
+zcH7yNTrlGf5PLSbUNFWau4/R4aD4yxq3dQyD8BOZrkmegdY/4WT7BMqS9zGtqpK
+BN7dPyUDenCH23/IOX1JrszMjsXkikqKrW3QFfs8nwH0RfWmPYpJZK1Kseul0UN9
+TvdK0nizRoxajB6pWOBQHD9M19vae0RHc9xfrPAkK2rNIYnZYiz71rlWYK0oBcON
+DC7s7/bf
+=pmUn
+-----END PGP SIGNATURE-----
