@@ -48,7 +48,7 @@ jobs:
           mkdir -p dist
           for output_dir in output termux-packages/output; do
             [[ -d "$output_dir" ]] || continue
-            find "$output_dir" -maxdepth 2 -type f \\( -name 'sccache_*_aarch64.deb' -o -name 'htop_*_aarch64.deb' \\) -exec cp -v -t dist/ {} +
+            find "$output_dir" -maxdepth 2 -type f \( -name 'sccache_*_aarch64.deb' -o -name 'htop_*_aarch64.deb' \) -exec cp -v -t dist/ {} +
           done
           shopt -s nullglob
           for package in sccache htop; do
