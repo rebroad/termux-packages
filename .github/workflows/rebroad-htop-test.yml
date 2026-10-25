@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [master]
     paths:
-      - packages/htop/build.sh
+      - packages/htop/**
       - .github/workflows/rebroad-htop-test.yml
   workflow_dispatch:
 
