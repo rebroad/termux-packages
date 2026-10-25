@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t packages < <(python3 -c 'import json; print("\\n".join(p["name"] for p in json.load(open("scripts/rebroad-upstream-packages.json"))["packages"]))')
+          mapfile -t packages < <(python3 -c 'import json; [print(p["name"]) for p in json.load(open("scripts/rebroad-upstream-packages.json"))["packages"]]')
           (("${#packages[@]}" > 0)) || { echo "Package manifest is empty" >&2; exit 1; }
           mkdir -p dist
           for package in "${packages[@]}"; do
@@ -93,7 +93,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t packages < <(python3 -c 'import json; print("\\n".join(p["name"] for p in json.load(open("../package-recipes/scripts/rebroad-upstream-packages.json"))["packages"]))')
+          mapfile -t packages < <(python3 -c 'import json; [print(p["name"]) for p in json.load(open("../package-recipes/scripts/rebroad-upstream-packages.json"))["packages"]]')
           for package in "${packages[@]}"; do
             shopt -s nullglob
             debs=("${GITHUB_WORKSPACE}/package/${package}"_*_aarch64.deb)
