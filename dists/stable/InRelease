@@ -5,26 +5,24 @@ Origin: ReBroad
 Label: ReBroad Termux
 Suite: stable
 Codename: stable
-Date: Sun, 25 Oct 2026 19:39:46 GMT
+Date: Sun, 25 Oct 2026 20:22:27 GMT
 Architectures: aarch64
 Components: main
-Description: ReBroad Termux native packages
+Description: ReBroad Termux native packages (experimental)
 SHA256:
- 260aa840a557d4b020c6b117192c69d0a9f27a9b5671349a0c1becc6d80b2ab2             1037 main/binary-aarch64/Packages
- ea91ad1f9b52253f4024e4b0a51cda6eda4d555ff77588031f1a6e0183dac707              571 main/binary-aarch64/Packages.gz
-
+ d0344d2ab1be34deb6217bf264e97ca0d787fe49151186e3912c8ca3a96c790f             1037 main/binary-aarch64/Packages
+ cddf5bf767199a50e27fb20ee7ab906f1b0bc61424a444dce769dcfdb660b6bb              575 main/binary-aarch64/Packages.gz
 -----BEGIN PGP SIGNATURE-----
 
-wsE7BAEBCgBvBYJq3lsHCRCigTy6fay2H0cUAAAAAAAeACBzYWx0QG5vdGF0aW9u
-cy5zZXF1b2lhLXBncC5vcmdibFvC10fIGnBQ0yFJZehAMxIQD3OogD4k+iY+1BXM
-/hYhBAMA9BEtb13Dj9GqS6KBPLp9rLYfAACrswv/W+6+IguYGbwdDOdIeCPuNvsd
-/DzRX6BBOSjHHyAjGV9TBC7b3IoyC4u9YZuCTmBQR3/f8/p3BGuWueRaoIwpZ5L3
-zOLCu0d+ZmHxP16lPTvrbY9Vx4d8JCU7giu4NT5qD/YfjGiYUwxZDIkKTU1kc1zK
-7DwW8x0t8nodNLoKDVHVJshqNEGTzlYKdZZEnuykhsXhDW7vZ34+Jfv7EptBGzaP
-0uWbdreu6+9fsNoUsJ62xlk0I1V9UMUs+DHq08JP7IYUfALNGymQ5FI1DUQzOlfb
-bpmMwQ7rcc9qW/1Nomnyw/Fo505l7OWLglwc58bKA84AzyW8g3R8vB+pF1tVgqkJ
-NbMUzY+O8pBKGJCjPZzpzQOV+vwck+OVkuJBQaUkJKS1lCy1fYLfFjmvCA2tTSqs
-NOmNq9pWzlQbYRL7czqeyUbSJQh+1uTIfsHylWTTLMHTfGjbDPNXd7GVBY8NIXQE
-p4tXY/+f7Cd2ms5RNjQxyfm3oX/zXKpUWjkLmD5d
-=emwS
+iQGzBAEBCgAdFiEEAwD0ES1vXcOP0apLooE8un2sth8FAmreZQMACgkQooE8un2s
+th/Egwv/Yr485YXMJbigCWS5m8+mBtI5lURdWLJJ9uMz8QeaYeaXD1yAfmCkPm7C
+ElBcojtRMmUM8Wy3eh2dJKrnqNELWeu94wMqMCGmA10XmQVrMtLthk9pkhyXIynl
+x/G1MBXgADpcmoLFiRcjVUOHAdDcMeywlXLQg9cnvB9Od0ityYZ9R0FFmWC9KvMW
+XBmylCVQCAPNbLJC/RzpcFxowFfwwJR/Ko1frxTStpiIDGAf/8+LUydPN75zUAsG
+1l/FB2W4nHDV4jp9KcuDrJRtVklo33V8SKzZzJP3GMNihS7WnQTllOsw+OJcuK+U
++akA9PE3uWarHVKaJPujMLKiyqk383/dqCSt4zKmzYrGUVGlNc2OdQdLMsjXOq0F
+zzoAZ56Eb8rsGeXQcEVHS8fG7AT0t/ii1urJtsqJCcloHViu2F+MBpdF9J/LWdSX
+KaoMwu0EXzwXkMuXsEQIq6U59Bu+4LZlAQHnc3dOL73AuspVeGTzNXGQEudMPagd
+cgTRe5Ri
+=H5Id
 -----END PGP SIGNATURE-----

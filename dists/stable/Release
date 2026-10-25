@@ -2,10 +2,10 @@ Origin: ReBroad
 Label: ReBroad Termux
 Suite: stable
 Codename: stable
-Date: Sun, 25 Oct 2026 19:39:46 GMT
+Date: Sun, 25 Oct 2026 20:22:27 GMT
 Architectures: aarch64
 Components: main
-Description: ReBroad Termux native packages
+Description: ReBroad Termux native packages (experimental)
 SHA256:
- 260aa840a557d4b020c6b117192c69d0a9f27a9b5671349a0c1becc6d80b2ab2             1037 main/binary-aarch64/Packages
- ea91ad1f9b52253f4024e4b0a51cda6eda4d555ff77588031f1a6e0183dac707              571 main/binary-aarch64/Packages.gz
+ d0344d2ab1be34deb6217bf264e97ca0d787fe49151186e3912c8ca3a96c790f             1037 main/binary-aarch64/Packages
+ cddf5bf767199a50e27fb20ee7ab906f1b0bc61424a444dce769dcfdb660b6bb              575 main/binary-aarch64/Packages.gz

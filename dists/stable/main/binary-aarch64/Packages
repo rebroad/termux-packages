@@ -8,10 +8,10 @@ Conflicts: htop-legacy
 Breaks: htop-legacy
 Replaces: htop-legacy
 Filename: pool/main/h/htop/htop_3.6.0-dev+rebroad1-0_aarch64.deb
-Size: 131760
-MD5sum: d84e7e1187e5cbedebfc392106e04ee8
-SHA1: d07074325e19404d90b506d415e80e828e8b4e7e
-SHA256: 3bb46f0640b50b5f0d8bdc335274df3c4d354d971ed945c96f366d087215f453
+Size: 131212
+MD5sum: e018fbea4577651526129b3bbac7988e
+SHA1: 02b4e5d86213be345967556cbcfcbfa9531c7e35
+SHA256: c5b55415eff86c982d5cc1f01f30758d1d83617913da02277110affcca98f7c4
 Homepage: https://github.com/rebroad/htop
 Description: Interactive process viewer for Linux (ReBroad fork)
 
@@ -22,10 +22,10 @@ Maintainer: @rebroad
 Installed-Size: 17396
 Depends: openssl
 Filename: pool/main/s/sccache/sccache_0.19.0+rebroad1_aarch64.deb
-Size: 5635640
-MD5sum: 1c90ee72a8f9384b88471e72a356fc80
-SHA1: f63d30d65bad44632b5505f30bc4358e5aadd163
-SHA256: d6c3ee8b6a431b713a386bdc40ee7d465485e30b42db07f9fc9e468226057911
+Size: 5636488
+MD5sum: dbd4640f34d5bba7a2acbe3a92b7faa5
+SHA1: 478a9081ab073ce77749754c7e6c7aaf3142f2d4
+SHA256: 4dee1819aaf9da309645dbb65c652837411a44ae162296d3518584811d1ff3be
 Homepage: https://github.com/rebroad/sccache
 Description: ReBroad sccache with daemon-free in-process cache access
 
