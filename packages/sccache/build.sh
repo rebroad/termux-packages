@@ -14,8 +14,8 @@ TERMUX_PKG_BUILD_IN_SRC=true
 termux_step_post_get_source() {
 	local actual
 	actual=$(git -C "$TERMUX_PKG_SRCDIR" rev-parse HEAD)
-	if [[ "$actual" != "d6923bfd2b9464925a7f34effaab3b4cf8d9b3b5" ]]; then
-		termux_error_exit "ReBroad sccache source changed: expected d6923bfd2b9464925a7f34effaab3b4cf8d9b3b5, got $actual"
+	if [[ "$actual" != "8f57692025f51cf44d67db0e90d84c52ef3d72a3" ]]; then
+		termux_error_exit "ReBroad sccache source changed: expected 8f57692025f51cf44d67db0e90d84c52ef3d72a3, got $actual"
 	fi
 }
 
