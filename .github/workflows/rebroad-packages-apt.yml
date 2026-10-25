@@ -6,7 +6,7 @@ on:
     paths:
       - packages/*/build.sh
       - scripts/rebroad-upstream-packages.json
-      - .github/workflows/rebroad-packages-apt.yml
+      - scripts/rebroad-publish-apt.sh\n      - .github/workflows/rebroad-packages-apt.yml
   workflow_dispatch:
 
 permissions:
@@ -107,7 +107,7 @@ jobs:
             cp -- "${debs[0]}" "$pool/"
           done
 
-      - name: Commit staged package binaries
+      - name: Regenerate and sign the APT index\n        working-directory: apt-feed\n        env:\n          PACKAGE_DIR: ${{ github.workspace }}/package\n          PACKAGE_MANIFEST: ${{ github.workspace }}/package-recipes/scripts/rebroad-upstream-packages.json\n          REBROAD_APT_GPG_PRIVATE_KEY: ${{ secrets.REBROAD_APT_GPG_PRIVATE_KEY }}\n          REBROAD_APT_GPG_PASSPHRASE: ${{ secrets.REBROAD_APT_GPG_PASSPHRASE }}\n        run: bash ../package-recipes/scripts/rebroad-publish-apt.sh\n\n      - name: Commit package binaries and signed APT index
         working-directory: apt-feed
         shell: bash
         run: |
