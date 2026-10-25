@@ -52,8 +52,10 @@ jobs:
             [[ "$(dpkg-deb --field "${debs[0]}" Package)" == "$package" ]]
             [[ "$(dpkg-deb --field "${debs[0]}" Architecture)" == aarch64 ]]
           done
-          [[ "$(dpkg-deb --field dist/sccache_0.19.0+rebroad1_aarch64.deb Version)" == "0.19.0+rebroad1" ]]
-          [[ "$(dpkg-deb --field dist/htop_3.6.0-dev+rebroad1_aarch64.deb Version)" == "3.6.0-dev+rebroad1" ]]
+          sccache_deb=(dist/sccache_*_aarch64.deb)
+          [[ "$(dpkg-deb --field "${sccache_deb[0]}" Version)" == "0.19.0+rebroad1" || "$(dpkg-deb --field "${sccache_deb[0]}" Version)" == "0.19.0+rebroad1-0" ]]
+          htop_deb=(dist/htop_*_aarch64.deb)
+          [[ "$(dpkg-deb --field "${htop_deb[0]}" Version)" == "3.6.0-dev+rebroad1-0" ]]
           sha256sum dist/*.deb
 
       - name: Save native Termux packages for staging
