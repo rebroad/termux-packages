@@ -54,7 +54,7 @@ done
 export GNUPGHOME
 GNUPGHOME=$(mktemp -d)
 chmod 700 "$GNUPGHOME"
-trap 'rm -rf -- "$GNUPGHOME"' EXIT
+apt_keyring=$(mktemp)\ntrap 'rm -rf -- "$GNUPGHOME"; rm -f -- "$apt_keyring"' EXIT
 
 printf '%s\n' "$REBROAD_APT_GPG_PRIVATE_KEY" | gpg --batch --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" --import
 actual_fpr=$(gpg --with-colons --list-secret-keys | awk -F: '$1 == "fpr" {print $10; exit}')
