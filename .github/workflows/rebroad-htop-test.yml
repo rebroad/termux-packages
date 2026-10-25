@@ -35,7 +35,7 @@ jobs:
           [[ "${#debs[@]}" -eq 1 ]]
           pkg="${debs[0]}"
           [[ "$(dpkg-deb -f "$pkg" Package)" == 'htop' ]]
-          [[ "$(dpkg-deb -f "$pkg" Version)" == '3.6.0-dev+rebroad1' ]]
+          [[ "$(dpkg-deb -f "$pkg" Version)" == '3.6.0-dev+rebroad1-0' ]]
           [[ "$(dpkg-deb -f "$pkg" Architecture)" == 'aarch64' ]]
           mkdir -p extracted
           dpkg-deb -x "$pkg" extracted
