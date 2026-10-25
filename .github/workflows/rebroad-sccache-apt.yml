@@ -43,7 +43,7 @@ jobs:
           [[ "${#debs[@]}" -eq 1 ]] || { echo "Expected one aarch64 sccache deb" >&2; exit 1; }
           [[ "$(dpkg-deb --field "${debs[0]}" Package)" == sccache ]]
           [[ "$(dpkg-deb --field "${debs[0]}" Architecture)" == aarch64 ]]
-          [[ "$(dpkg-deb --field "${debs[0]}" Version)" == "0.18.0+rebroad1" ]]
+          [[ "$(dpkg-deb --field "${debs[0]}" Version)" == "0.19.0+rebroad1" ]]
           sha256sum "${debs[0]}"
 
       - name: Save native Termux sccache DEB
