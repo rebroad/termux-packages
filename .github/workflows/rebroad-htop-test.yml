@@ -35,7 +35,9 @@ jobs:
           [[ "${#debs[@]}" -eq 1 ]]
           pkg="${debs[0]}"
           [[ "$(dpkg-deb -f "$pkg" Package)" == 'htop' ]]
-          [[ "$(dpkg-deb -f "$pkg" Version)" == '3.6.0-dev+rebroad1-0' ]]
+          expected_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^"]+)"?$/\1/p' packages/htop/build.sh)
+          actual_version=$(dpkg-deb -f "$pkg" Version)
+          [[ "$actual_version" == "$expected_version" || "$actual_version" == "$expected_version-0" ]]
           [[ "$(dpkg-deb -f "$pkg" Architecture)" == 'aarch64' ]]
           mkdir -p extracted
           dpkg-deb -x "$pkg" extracted
