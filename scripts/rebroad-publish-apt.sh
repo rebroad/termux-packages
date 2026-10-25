@@ -5,7 +5,7 @@ set -euo pipefail
 # this script's package-recipes checkout; PACKAGE_DIR contains built aarch64 debs.
 : "${PACKAGE_DIR:?Missing PACKAGE_DIR}"
 : "${REBROAD_APT_GPG_PRIVATE_KEY:?Missing private key secret}"
-: "${REBROAD_APT_GPG_PASSPHRASE:?Missing private key passphrase}"
+passphrase="${REBROAD_APT_GPG_PASSPHRASE:-}"
 expected_fpr="98812D13BCDBF9125D44E0DA8C6E5024C203FC56"
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 manifest="${PACKAGE_MANIFEST:-$script_dir/rebroad-upstream-packages.json}"
@@ -57,7 +57,7 @@ chmod 700 "$GNUPGHOME"
 apt_keyring=$(mktemp)
 trap 'rm -rf -- "$GNUPGHOME"; rm -f -- "$apt_keyring"' EXIT
 
-printf '%s\n' "$REBROAD_APT_GPG_PRIVATE_KEY" | gpg --batch --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" --import
+printf '%s\n' "$REBROAD_APT_GPG_PRIVATE_KEY" | gpg --batch --pinentry-mode loopback --passphrase "${passphrase}" --import
 actual_fpr=$(gpg --with-colons --list-secret-keys | awk -F: '$1 == "fpr" {print $10; exit}')
 [[ "$actual_fpr" == "$expected_fpr" ]] || {
     echo "Wrong APT signing key: $actual_fpr" >&2
@@ -95,10 +95,10 @@ for name in files:
 (d / "Release").write_text("\n".join(head) + "\n", encoding="utf-8")
 PY
 
-gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" \
+gpg --batch --yes --pinentry-mode loopback --passphrase "${passphrase}" \
     --local-user "$expected_fpr" --output dists/stable/InRelease \
     --clearsign dists/stable/Release
-gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" \
+gpg --batch --yes --pinentry-mode loopback --passphrase "${passphrase}" \
     --local-user "$expected_fpr" --output dists/stable/Release.gpg \
     --detach-sign dists/stable/Release
 gpg --batch --no-default-keyring --keyring "$apt_keyring" --import ./rebroad-archive-key.asc
