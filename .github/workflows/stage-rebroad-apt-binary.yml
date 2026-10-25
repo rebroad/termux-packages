@@ -1,0 +1,57 @@
+name: Stage validated ReBroad sccache binary in APT pool
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - .github/workflows/stage-rebroad-apt-binary.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download verified existing native Termux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rebroad-sccache-aarch64
+          run-id: 40184510801
+          repository: rebroad/termux-packages
+          github-token: ${{ github.token }}
+          path: deb
+
+      - name: Verify pinned binary package checksum and architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '5bd444388daecc327aa1bb311d3b94dfa49b55ad0b96df9f729796b7f6ce8e74  deb/sccache_0.18.0+rebroad1_aarch64.deb' | sha256sum -c
+          [[ "$(dpkg-deb -f 'deb/sccache_0.18.0+rebroad1_aarch64.deb' Package)" == 'sccache' ]]
+          [[ "$(dpkg-deb -f 'deb/sccache_0.18.0+rebroad1_aarch64.deb' Version)" == '0.18.0+rebroad1' ]]
+          [[ "$(dpkg-deb -f 'deb/sccache_0.18.0+rebroad1_aarch64.deb' Architecture)" == 'aarch64' ]]
+
+      - name: Check out existing feed as an independent Git branch
+        uses: actions/checkout@v4
+        with:
+          ref: apt-repo
+          path: feed
+
+      - name: Stage binary only (index must be cryptographically signed separately)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p feed/pool/main/s/sccache
+          install -m 0644 'deb/sccache_0.18.0+rebroad1_aarch64.deb' 'feed/pool/main/s/sccache/sccache_0.18.0+rebroad1_aarch64.deb'
+          cd feed
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'pool/main/s/sccache/sccache_0.18.0+rebroad1_aarch64.deb'
+          if git diff --cached --quiet; then
+            echo 'Binary is already staged'
+          else
+            git commit -m 'Stage audited ReBroad sccache ARM64 binary for signed index'
+            git push origin HEAD:apt-repo
+          fi
