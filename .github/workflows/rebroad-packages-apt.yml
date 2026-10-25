@@ -6,7 +6,8 @@ on:
     paths:
       - packages/*/build.sh
       - scripts/rebroad-upstream-packages.json
-      - scripts/rebroad-publish-apt.sh\n      - .github/workflows/rebroad-packages-apt.yml
+      - scripts/rebroad-publish-apt.sh
+      - .github/workflows/rebroad-packages-apt.yml
   workflow_dispatch:
 
 permissions:
@@ -123,7 +124,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add pool/main
+          git add pool/main dists/stable
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Stage ReBroad Termux package updates"
           git push origin HEAD:apt-repo
