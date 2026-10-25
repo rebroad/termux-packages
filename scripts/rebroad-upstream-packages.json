@@ -1,0 +1,18 @@
+{
+  "packages": [
+    {
+      "name": "sccache",
+      "repository": "rebroad/sccache",
+      "branch": "in-process-cache-v0.19.0",
+      "source_commit": "c097bfaba06bb21c6248b32c30033df3a45086c0",
+      "version_prefix": "0.19.0+rebroad1"
+    },
+    {
+      "name": "htop",
+      "repository": "rebroad/htop",
+      "branch": "main",
+      "source_commit": "b282c8a2c0f7d0ecd3c352dd387f05865db6ce9d",
+      "version_prefix": "3.6.0-dev+rebroad1"
+    }
+  ]
+}

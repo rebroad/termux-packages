@@ -1,0 +1,52 @@
+name: Validate ReBroad htop on native Termux ARM64
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - packages/htop/**
+      - .github/workflows/rebroad-htop-test.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-aarch64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout ReBroad Termux packages
+        uses: actions/checkout@v4
+      - name: Lint ReBroad htop recipe
+        run: ./scripts/lint-packages.sh packages/htop/build.sh
+      - name: Build matching Termux package-builder image with Android NDK
+        run: docker build --tag ghcr.io/termux/package-builder:latest scripts/
+      - name: Build native Android ARM64 htop
+        run: ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 htop
+      - name: Validate built .deb
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          find output termux-packages/output -maxdepth 2 -type f -name 'htop_*_aarch64.deb' -exec cp -v -t dist/ {} + 2>/dev/null || true
+          shopt -s nullglob
+          debs=(dist/htop_*_aarch64.deb)
+          [[ "${#debs[@]}" -eq 1 ]]
+          pkg="${debs[0]}"
+          [[ "$(dpkg-deb -f "$pkg" Package)" == 'htop' ]]
+          expected_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^"]+)"?$/\1/p' packages/htop/build.sh)
+          actual_version=$(dpkg-deb -f "$pkg" Version)
+          [[ "$actual_version" == "$expected_version" || "$actual_version" == "$expected_version-0" ]]
+          [[ "$(dpkg-deb -f "$pkg" Architecture)" == 'aarch64' ]]
+          mkdir -p extracted
+          dpkg-deb -x "$pkg" extracted
+          readelf -l extracted/data/data/com.termux/files/usr/bin/htop | grep -Fq '/system/bin/linker64'
+          sha256sum "$pkg"
+      - name: Save verified native .deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: rebroad-htop-3.6.0-dev-aarch64
+          path: dist/*.deb
+          retention-days: 30
+          if-no-files-found: error

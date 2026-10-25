@@ -1,28 +1,61 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Called from a checked-out apt-repo branch in GitHub Actions, with
-# REBROAD_APT_GPG_PRIVATE_KEY and REBROAD_APT_GPG_PASSPHRASE secrets.
+# Run from a checked-out apt-repo worktree. The package manifest is read from
+# this script's package-recipes checkout; PACKAGE_DIR contains built aarch64 debs.
 : "${PACKAGE_DIR:?Missing PACKAGE_DIR}"
 : "${REBROAD_APT_GPG_PRIVATE_KEY:?Missing private key secret}"
-: "${REBROAD_APT_GPG_PASSPHRASE:?Missing private key passphrase secret}"
+: "${REBROAD_APT_GPG_PASSPHRASE:?Missing private key passphrase}"
 expected_fpr="1ED97E796A59F08B22CE7CACFFF9DB83A50BE6C9"
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+manifest="${PACKAGE_MANIFEST:-$script_dir/rebroad-upstream-packages.json}"
+
+mapfile -t package_names < <(python3 - "$manifest" <<'PY'
+import json
+import sys
+for item in json.load(open(sys.argv[1], encoding="utf-8"))["packages"]:
+    print(item["name"])
+PY
+)
+(("${#package_names[@]}" > 0)) || { echo "Package manifest is empty" >&2; exit 1; }
+
+declare -A listed=() seen=()
+for name in "${package_names[@]}"; do
+    [[ -z "${listed[$name]-}" ]] || { echo "Duplicate manifest package: $name" >&2; exit 1; }
+    listed["$name"]=1
+done
 
 shopt -s nullglob
-debs=("$PACKAGE_DIR"/sccache_*_aarch64.deb)
-if [[ "${#debs[@]}" -ne 1 ]]; then
-    echo "Expected exactly one aarch64 sccache package; got ${#debs[@]}" >&2
+debs=("$PACKAGE_DIR"/*.deb)
+if [[ "${#debs[@]}" -ne "${#package_names[@]}" ]]; then
+    echo "Expected ${#package_names[@]} aarch64 packages from the manifest; got ${#debs[@]}" >&2
     exit 1
 fi
-pkg="${debs[0]}"
-[[ "$(dpkg-deb --field "$pkg" Package)" == sccache ]] || exit 1
-[[ "$(dpkg-deb --field "$pkg" Architecture)" == aarch64 ]] || exit 1
-[[ "$(dpkg-deb --field "$pkg" Version)" == "0.18.0+rebroad1" ]] || exit 1
+
+for pkg in "${debs[@]}"; do
+    name=$(dpkg-deb --field "$pkg" Package)
+    arch=$(dpkg-deb --field "$pkg" Architecture)
+    [[ -n "${listed[$name]-}" ]] || { echo "Package not in manifest: $name" >&2; exit 1; }
+    [[ "$arch" == aarch64 ]] || { echo "Unexpected architecture for $name: $arch" >&2; exit 1; }
+    [[ -z "${seen[$name]-}" ]] || { echo "Duplicate package: $name" >&2; exit 1; }
+    seen["$name"]=1
+
+    first_letter="${name:0:1}"
+    package_pool="pool/main/$first_letter/$name"
+    mkdir -p "$package_pool"
+    rm -f "$package_pool"/"${name}"_*_aarch64.deb
+    cp -- "$pkg" "$package_pool/"
+done
+
+for name in "${package_names[@]}"; do
+    [[ -n "${seen[$name]-}" ]] || { echo "Missing package: $name" >&2; exit 1; }
+done
 
 export GNUPGHOME
 GNUPGHOME=$(mktemp -d)
 chmod 700 "$GNUPGHOME"
-trap 'rm -rf -- "$GNUPGHOME"' EXIT
+apt_keyring=$(mktemp)
+trap 'rm -rf -- "$GNUPGHOME"; rm -f -- "$apt_keyring"' EXIT
 
 printf '%s\n' "$REBROAD_APT_GPG_PRIVATE_KEY" | gpg --batch --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" --import
 actual_fpr=$(gpg --with-colons --list-secret-keys | awk -F: '$1 == "fpr" {print $10; exit}')
@@ -31,10 +64,7 @@ actual_fpr=$(gpg --with-colons --list-secret-keys | awk -F: '$1 == "fpr" {print 
     exit 1
 }
 
-mkdir -p pool/main/s/sccache dists/stable/main/binary-aarch64
-# Replace only sccache for this architecture; keep any future other packages.
-rm -f pool/main/s/sccache/sccache_*_aarch64.deb
-cp -- "$pkg" pool/main/s/sccache/
+mkdir -p dists/stable/main/binary-aarch64
 dpkg-scanpackages -a aarch64 pool/main /dev/null > dists/stable/main/binary-aarch64/Packages
 gzip -n -9 -c dists/stable/main/binary-aarch64/Packages > dists/stable/main/binary-aarch64/Packages.gz
 
@@ -65,11 +95,14 @@ for name in files:
 (d / "Release").write_text("\n".join(head) + "\n", encoding="utf-8")
 PY
 
-gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE"     --local-user "$expected_fpr" --output dists/stable/InRelease     --clearsign dists/stable/Release
-gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE"     --local-user "$expected_fpr" --output dists/stable/Release.gpg     --detach-sign dists/stable/Release
-gpg --batch --yes --keyring ./rebroad-keyring.gpg --import rebroad-archive-key.asc
-gpgv --keyring ./rebroad-keyring.gpg dists/stable/InRelease
-rm -f ./rebroad-keyring.gpg
+gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" \
+    --local-user "$expected_fpr" --output dists/stable/InRelease \
+    --clearsign dists/stable/Release
+gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" \
+    --local-user "$expected_fpr" --output dists/stable/Release.gpg \
+    --detach-sign dists/stable/Release
+gpg --batch --no-default-keyring --keyring "$apt_keyring" --import ./rebroad-archive-key.asc
+gpgv --keyring "$apt_keyring" dists/stable/InRelease
 
-echo "Signed APT index for $pkg"
-sha256sum "$pkg"
+echo "Signed APT index for ${#package_names[@]} manifest-listed packages"
+sha256sum "${debs[@]}"

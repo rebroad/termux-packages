@@ -1,0 +1,63 @@
+name: Refresh ReBroad package sources
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Check out package recipes
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update tracked upstream commits
+        run: python3 scripts/rebroad-update-upstreams.py
+
+      - name: Build and validate changed packages before opening a PR
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(git diff --name-only -- packages/ | awk -F/ '$1 == "packages" && $3 == "build.sh" {print $2}' | sort -u)
+          (("${#packages[@]}" > 0)) || exit 0
+          docker build --tag ghcr.io/termux/package-builder:latest scripts/
+          mkdir -p dist
+          for package in "${packages[@]}"; do
+            ./scripts/lint-packages.sh "packages/$package/build.sh"
+            ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 "$package"
+            shopt -s nullglob
+            debs=(output/"${package}"_*_aarch64.deb)
+            [[ "${#debs[@]}" -eq 1 ]] || { echo "Expected one built ${package} package" >&2; exit 1; }
+            pkg="${debs[0]}"
+            [[ "$(dpkg-deb --field "$pkg" Package)" == "$package" ]]
+            [[ "$(dpkg-deb --field "$pkg" Architecture)" == aarch64 ]]
+            expected_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^"]+)"?$/\1/p' "packages/$package/build.sh")
+            actual_version=$(dpkg-deb --field "$pkg" Version)
+            [[ "$actual_version" == "$expected_version" || "$actual_version" == "$expected_version-0" ]] || {
+              echo "Unexpected $package version: $actual_version (recipe: $expected_version)" >&2
+              exit 1
+            }
+            cp -- "$pkg" dist/
+          done
+          sha256sum dist/*.deb
+
+      - name: Open or update a recipe refresh PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/rebroad-upstream-refresh
+          delete-branch: true
+          title: "Refresh ReBroad package sources"
+          commit-message: "Refresh ReBroad package sources"
+          body: |
+            This automated update tracks new commits in the upstream branches listed in `scripts/rebroad-upstream-packages.json`.
+            It updates the pinned source commit and monotonically increases the ReBroad package version.
+            Changed packages were linted and built for native Termux aarch64 in the update workflow.
