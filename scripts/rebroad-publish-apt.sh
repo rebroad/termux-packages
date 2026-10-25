@@ -6,7 +6,7 @@ set -euo pipefail
 : "${PACKAGE_DIR:?Missing PACKAGE_DIR}"
 : "${REBROAD_APT_GPG_PRIVATE_KEY:?Missing private key secret}"
 : "${REBROAD_APT_GPG_PASSPHRASE:?Missing private key passphrase}"
-expected_fpr="1ED97E796A59F08B22CE7CACFFF9DB83A50BE6C9"
+expected_fpr="98812D13BCDBF9125D44E0DA8C6E5024C203FC56"
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 manifest="${PACKAGE_MANIFEST:-$script_dir/rebroad-upstream-packages.json}"
 
