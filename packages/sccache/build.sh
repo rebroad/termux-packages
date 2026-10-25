@@ -2,9 +2,9 @@ TERMUX_PKG_HOMEPAGE=https://github.com/rebroad/sccache
 TERMUX_PKG_DESCRIPTION="ReBroad sccache build cache with experimental Rust incremental snapshots"
 TERMUX_PKG_LICENSE="Apache-2.0"
 TERMUX_PKG_MAINTAINER="@rebroad"
-TERMUX_PKG_VERSION=0.18.0+rebroad1
+TERMUX_PKG_VERSION=0.19.0+rebroad1
 TERMUX_PKG_SRCURL=git+https://github.com/rebroad/sccache.git
-TERMUX_PKG_GIT_BRANCH=rust-incremental-snapshots
+TERMUX_PKG_GIT_BRANCH=v0.19.0-port-fallback
 TERMUX_PKG_SHA256=SKIP_CHECKSUM
 TERMUX_PKG_DEPENDS="openssl"
 TERMUX_PKG_BUILD_IN_SRC=true
@@ -14,8 +14,8 @@ TERMUX_PKG_BUILD_IN_SRC=true
 termux_step_post_get_source() {
 	local actual
 	actual=$(git -C "$TERMUX_PKG_SRCDIR" rev-parse HEAD)
-	if [[ "$actual" != "1570d050233a77718c24ba0e27d702760adc01f4" ]]; then
-		termux_error_exit "ReBroad sccache source changed: expected 1570d050233a77718c24ba0e27d702760adc01f4, got $actual"
+	if [[ "$actual" != "d6923bfd2b9464925a7f34effaab3b4cf8d9b3b5" ]]; then
+		termux_error_exit "ReBroad sccache source changed: expected d6923bfd2b9464925a7f34effaab3b4cf8d9b3b5, got $actual"
 	fi
 }
 
