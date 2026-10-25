@@ -8,16 +8,43 @@ set -euo pipefail
 : "${REBROAD_APT_GPG_PASSPHRASE:?Missing private key passphrase secret}"
 expected_fpr="1ED97E796A59F08B22CE7CACFFF9DB83A50BE6C9"
 
+declare -A expected_versions=(
+    [sccache]="0.19.0+rebroad1"
+    [htop]="3.6.0-dev+rebroad1"
+)
+declare -A seen_packages=()
+
 shopt -s nullglob
-debs=("$PACKAGE_DIR"/sccache_*_aarch64.deb)
-if [[ "${#debs[@]}" -ne 1 ]]; then
-    echo "Expected exactly one aarch64 sccache package; got ${#debs[@]}" >&2
+debs=("$PACKAGE_DIR"/*.deb)
+if [[ "${#debs[@]}" -ne 2 ]]; then
+    echo "Expected one aarch64 DEB for sccache and htop; got ${#debs[@]}" >&2
     exit 1
 fi
-pkg="${debs[0]}"
-[[ "$(dpkg-deb --field "$pkg" Package)" == sccache ]] || exit 1
-[[ "$(dpkg-deb --field "$pkg" Architecture)" == aarch64 ]] || exit 1
-[[ "$(dpkg-deb --field "$pkg" Version)" == "0.18.0+rebroad1" ]] || exit 1
+
+for pkg in "${debs[@]}"; do
+    name=$(dpkg-deb --field "$pkg" Package)
+    version=$(dpkg-deb --field "$pkg" Version)
+    arch=$(dpkg-deb --field "$pkg" Architecture)
+    expected_version="${expected_versions[$name]-}"
+    [[ -n "$expected_version" ]] || { echo "Unexpected package: $name" >&2; exit 1; }
+    [[ "$version" == "$expected_version" ]] || {
+        echo "Unexpected $name version: $version (expected $expected_version)" >&2
+        exit 1
+    }
+    [[ "$arch" == aarch64 ]] || { echo "Unexpected architecture for $name: $arch" >&2; exit 1; }
+    [[ -z "${seen_packages[$name]-}" ]] || { echo "Duplicate package: $name" >&2; exit 1; }
+    seen_packages["$name"]=1
+
+    first_letter="${name:0:1}"
+    package_pool="pool/main/$first_letter/$name"
+    mkdir -p "$package_pool"
+    rm -f "$package_pool"/"${name}"_*_aarch64.deb
+    cp -- "$pkg" "$package_pool/"
+done
+
+for name in "${!expected_versions[@]}"; do
+    [[ -n "${seen_packages[$name]-}" ]] || { echo "Missing package: $name" >&2; exit 1; }
+done
 
 export GNUPGHOME
 GNUPGHOME=$(mktemp -d)
@@ -31,10 +58,7 @@ actual_fpr=$(gpg --with-colons --list-secret-keys | awk -F: '$1 == "fpr" {print 
     exit 1
 }
 
-mkdir -p pool/main/s/sccache dists/stable/main/binary-aarch64
-# Replace only sccache for this architecture; keep any future other packages.
-rm -f pool/main/s/sccache/sccache_*_aarch64.deb
-cp -- "$pkg" pool/main/s/sccache/
+mkdir -p dists/stable/main/binary-aarch64
 dpkg-scanpackages -a aarch64 pool/main /dev/null > dists/stable/main/binary-aarch64/Packages
 gzip -n -9 -c dists/stable/main/binary-aarch64/Packages > dists/stable/main/binary-aarch64/Packages.gz
 
@@ -65,11 +89,15 @@ for name in files:
 (d / "Release").write_text("\n".join(head) + "\n", encoding="utf-8")
 PY
 
-gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE"     --local-user "$expected_fpr" --output dists/stable/InRelease     --clearsign dists/stable/Release
-gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE"     --local-user "$expected_fpr" --output dists/stable/Release.gpg     --detach-sign dists/stable/Release
-gpg --batch --yes --keyring ./rebroad-keyring.gpg --import rebroad-archive-key.asc
+gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" \
+    --local-user "$expected_fpr" --output dists/stable/InRelease \
+    --clearsign dists/stable/Release
+gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" \
+    --local-user "$expected_fpr" --output dists/stable/Release.gpg \
+    --detach-sign dists/stable/Release
+gpg --batch --keyring ./rebroad-keyring.gpg --import rebroad-archive-key.asc
 gpgv --keyring ./rebroad-keyring.gpg dists/stable/InRelease
 rm -f ./rebroad-keyring.gpg
 
-echo "Signed APT index for $pkg"
-sha256sum "$pkg"
+echo "Signed APT index for sccache and htop"
+sha256sum "${debs[@]}"
