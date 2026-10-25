@@ -1,0 +1,120 @@
+name: Build and stage ReBroad Termux packages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - packages/*/build.sh
+      - scripts/rebroad-upstream-packages.json
+      - .github/workflows/rebroad-packages-apt.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-aarch64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Check out Termux package definitions
+        uses: actions/checkout@v4
+
+      - name: Build matching Termux container with Android NDK r29
+        run: docker build --tag ghcr.io/termux/package-builder:latest scripts/
+
+      - name: Build and validate all listed packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(python3 -c 'import json; [print(p["name"]) for p in json.load(open("scripts/rebroad-upstream-packages.json"))["packages"]]')
+          (("${#packages[@]}" > 0)) || { echo "Package manifest is empty" >&2; exit 1; }
+          mkdir -p dist
+          for package in "${packages[@]}"; do
+            ./scripts/lint-packages.sh "packages/$package/build.sh"
+            ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 "$package"
+          done
+          for output_dir in output termux-packages/output; do
+            [[ -d "$output_dir" ]] || continue
+            for package in "${packages[@]}"; do
+              find "$output_dir" -maxdepth 2 -type f -name "${package}_*_aarch64.deb" -exec cp -v -t dist/ {} +
+            done
+          done
+          shopt -s nullglob
+          for package in "${packages[@]}"; do
+            debs=(dist/"${package}"_*_aarch64.deb)
+            [[ "${#debs[@]}" -eq 1 ]] || { echo "Expected one aarch64 ${package} deb" >&2; exit 1; }
+            pkg="${debs[0]}"
+            [[ "$(dpkg-deb --field "$pkg" Package)" == "$package" ]]
+            [[ "$(dpkg-deb --field "$pkg" Architecture)" == aarch64 ]]
+            expected_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^"]+)"?$/\1/p' "packages/$package/build.sh")
+            actual_version=$(dpkg-deb --field "$pkg" Version)
+            [[ "$actual_version" == "$expected_version" || "$actual_version" == "$expected_version-0" ]] || {
+              echo "Unexpected $package version: $actual_version (recipe: $expected_version)" >&2
+              exit 1
+            }
+          done
+          sha256sum dist/*.deb
+
+      - name: Save native Termux packages for staging
+        uses: actions/upload-artifact@v4
+        with:
+          name: rebroad-termux-aarch64
+          path: dist/*.deb
+          if-no-files-found: error
+          retention-days: 30
+
+  stage-apt:
+    needs: [build-aarch64]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Check out the existing APT feed
+        uses: actions/checkout@v4
+        with:
+          ref: apt-repo
+          path: apt-feed
+
+      - name: Check out the package manifest
+        uses: actions/checkout@v4
+        with:
+          path: package-recipes
+
+      - name: Download native Termux packages
+        uses: actions/download-artifact@v4
+        with:
+          name: rebroad-termux-aarch64
+          path: package
+
+      - name: Stage every listed package in the APT pool
+        working-directory: apt-feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(python3 -c 'import json; [print(p["name"]) for p in json.load(open("../package-recipes/scripts/rebroad-upstream-packages.json"))["packages"]]')
+          for package in "${packages[@]}"; do
+            shopt -s nullglob
+            debs=("${GITHUB_WORKSPACE}/package/${package}"_*_aarch64.deb)
+            [[ "${#debs[@]}" -eq 1 ]] || { echo "Expected one ${package} package" >&2; exit 1; }
+            [[ "$(dpkg-deb --field "${debs[0]}" Package)" == "$package" ]]
+            [[ "$(dpkg-deb --field "${debs[0]}" Architecture)" == aarch64 ]]
+            first_letter="${package:0:1}"
+            pool="pool/main/$first_letter/$package"
+            mkdir -p "$pool"
+            rm -f "$pool"/"${package}"_*_aarch64.deb
+            cp -- "${debs[0]}" "$pool/"
+          done
+
+      - name: Commit staged package binaries
+        working-directory: apt-feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pool/main
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Stage ReBroad Termux package updates"
+          git push origin HEAD:apt-repo
