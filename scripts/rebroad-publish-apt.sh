@@ -1,39 +1,44 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Called from a checked-out apt-repo branch in GitHub Actions, with
-# REBROAD_APT_GPG_PRIVATE_KEY and REBROAD_APT_GPG_PASSPHRASE secrets.
+# Run from a checked-out apt-repo worktree. The package manifest is read from
+# this script's package-recipes checkout; PACKAGE_DIR contains built aarch64 debs.
 : "${PACKAGE_DIR:?Missing PACKAGE_DIR}"
 : "${REBROAD_APT_GPG_PRIVATE_KEY:?Missing private key secret}"
-: "${REBROAD_APT_GPG_PASSPHRASE:?Missing private key passphrase secret}"
+: "${REBROAD_APT_GPG_PASSPHRASE:?Missing private key passphrase}"
 expected_fpr="1ED97E796A59F08B22CE7CACFFF9DB83A50BE6C9"
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+manifest="${PACKAGE_MANIFEST:-$script_dir/rebroad-upstream-packages.json}"
 
-declare -A expected_versions=(
-    [sccache]="0.19.0+rebroad1"
-    [htop]="3.6.0-dev+rebroad1"
+mapfile -t package_names < <(python3 - "$manifest" <<'PY'
+import json
+import sys
+for item in json.load(open(sys.argv[1], encoding="utf-8"))["packages"]:
+    print(item["name"])
+PY
 )
-declare -A seen_packages=()
+(("${#package_names[@]}" > 0)) || { echo "Package manifest is empty" >&2; exit 1; }
+
+declare -A listed=() seen=()
+for name in "${package_names[@]}"; do
+    [[ -z "${listed[$name]-}" ]] || { echo "Duplicate manifest package: $name" >&2; exit 1; }
+    listed["$name"]=1
+done
 
 shopt -s nullglob
 debs=("$PACKAGE_DIR"/*.deb)
-if [[ "${#debs[@]}" -ne 2 ]]; then
-    echo "Expected one aarch64 DEB for sccache and htop; got ${#debs[@]}" >&2
+if [[ "${#debs[@]}" -ne "${#package_names[@]}" ]]; then
+    echo "Expected ${#package_names[@]} aarch64 packages from the manifest; got ${#debs[@]}" >&2
     exit 1
 fi
 
 for pkg in "${debs[@]}"; do
     name=$(dpkg-deb --field "$pkg" Package)
-    version=$(dpkg-deb --field "$pkg" Version)
     arch=$(dpkg-deb --field "$pkg" Architecture)
-    expected_version="${expected_versions[$name]-}"
-    [[ -n "$expected_version" ]] || { echo "Unexpected package: $name" >&2; exit 1; }
-    [[ "$version" == "$expected_version" ]] || {
-        echo "Unexpected $name version: $version (expected $expected_version)" >&2
-        exit 1
-    }
+    [[ -n "${listed[$name]-}" ]] || { echo "Package not in manifest: $name" >&2; exit 1; }
     [[ "$arch" == aarch64 ]] || { echo "Unexpected architecture for $name: $arch" >&2; exit 1; }
-    [[ -z "${seen_packages[$name]-}" ]] || { echo "Duplicate package: $name" >&2; exit 1; }
-    seen_packages["$name"]=1
+    [[ -z "${seen[$name]-}" ]] || { echo "Duplicate package: $name" >&2; exit 1; }
+    seen["$name"]=1
 
     first_letter="${name:0:1}"
     package_pool="pool/main/$first_letter/$name"
@@ -42,8 +47,8 @@ for pkg in "${debs[@]}"; do
     cp -- "$pkg" "$package_pool/"
 done
 
-for name in "${!expected_versions[@]}"; do
-    [[ -n "${seen_packages[$name]-}" ]] || { echo "Missing package: $name" >&2; exit 1; }
+for name in "${package_names[@]}"; do
+    [[ -n "${seen[$name]-}" ]] || { echo "Missing package: $name" >&2; exit 1; }
 done
 
 export GNUPGHOME
@@ -95,9 +100,9 @@ gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPH
 gpg --batch --yes --pinentry-mode loopback --passphrase "$REBROAD_APT_GPG_PASSPHRASE" \
     --local-user "$expected_fpr" --output dists/stable/Release.gpg \
     --detach-sign dists/stable/Release
-gpg --batch --keyring ./rebroad-keyring.gpg --import rebroad-archive-key.asc
-gpgv --keyring ./rebroad-keyring.gpg dists/stable/InRelease
-rm -f ./rebroad-keyring.gpg
+gpg --batch --keyring "$script_dir/rebroad-keyring.gpg" --import "$script_dir/../rebroad-archive-key.asc"
+gpgv --keyring "$script_dir/rebroad-keyring.gpg" dists/stable/InRelease
+rm -f "$script_dir/rebroad-keyring.gpg"
 
-echo "Signed APT index for sccache and htop"
+echo "Signed APT index for ${#package_names[@]} manifest-listed packages"
 sha256sum "${debs[@]}"
