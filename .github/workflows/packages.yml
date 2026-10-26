@@ -213,6 +213,18 @@ jobs:
             needs_docker_build=true
           fi
         fi
+
+        # The shared package-builder image can lag behind this checkout's NDK
+        # version, especially in forks that do not publish their own image.
+        # Rebuild it locally when it lacks the NDK required by this source tree.
+        if [[ "${#packages[@]}" -gt 0 && "$needs_docker_build" != true ]]; then
+          if ! docker run --rm --entrypoint /bin/bash ghcr.io/termux/package-builder:latest \
+              -c 'test -d "$HOME/lib/android-ndk-r29" && grep -q "Pkg.Revision = 29" "$HOME/lib/android-ndk-r29/source.properties"' \
+              >/dev/null 2>&1; then
+            echo "Package builder image is missing Android NDK r29; rebuilding it from this checkout."
+            needs_docker_build=true
+          fi
+        fi
         echo "needs-docker-build=$needs_docker_build" >> $GITHUB_OUTPUT
 
     - name: Lint packages
