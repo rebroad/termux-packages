@@ -1,0 +1,102 @@
+name: Automatically update ReBroad sccache
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: rebroad-package-source-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    outputs:
+      source_changed: ${{ steps.update.outputs.source_changed }}
+      needs_publish: ${{ steps.update.outputs.needs_publish }}
+    steps:
+      - name: Check out package recipes
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Track the latest sccache main commit
+        id: update
+        run: |
+          python3 scripts/rebroad-update-upstreams.py --package sccache
+          if git diff --quiet -- packages/sccache/build.sh scripts/rebroad-upstream-packages.json; then
+            source_changed=false
+          else
+            source_changed=true
+          fi
+          echo "source_changed=$source_changed" >> "$GITHUB_OUTPUT"
+
+          git fetch origin apt-repo
+          recipe_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^" ]+)"?$/\1/p' packages/sccache/build.sh)
+          published_version=$(git show FETCH_HEAD:dists/stable/main/binary-aarch64/Packages | awk '
+            BEGIN { RS = "" }
+            $1 == "Package:" && $2 == "sccache" {
+              for (field = 1; field < NF; field++) {
+                if ($field == "Version:") {
+                  print $(field + 1)
+                  exit
+                }
+              }
+            }
+          ')
+          if [[ "$source_changed" == true || ( "$published_version" != "$recipe_version" && "$published_version" != "$recipe_version-0" ) ]]; then
+            echo "needs_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and validate the updated sccache package
+        if: steps.update.outputs.needs_publish == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --tag ghcr.io/termux/package-builder:latest scripts/
+          ./scripts/lint-packages.sh packages/sccache/build.sh
+          ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 sccache
+          mkdir -p dist
+          for output_dir in output termux-packages/output; do
+            [[ -d "$output_dir" ]] || continue
+            find "$output_dir" -maxdepth 2 -type f -name 'sccache_*_aarch64.deb' -exec cp -t dist/ {} +
+          done
+          shopt -s nullglob
+          debs=(dist/sccache_*_aarch64.deb)
+          [[ "${#debs[@]}" -eq 1 ]] || { echo "Expected one built sccache package" >&2; exit 1; }
+          [[ "$(dpkg-deb --field "${debs[0]}" Package)" == sccache ]]
+          [[ "$(dpkg-deb --field "${debs[0]}" Architecture)" == aarch64 ]]
+          expected_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^" ]+)"?$/\1/p' packages/sccache/build.sh)
+          actual_version=$(dpkg-deb --field "${debs[0]}" Version)
+          [[ "$actual_version" == "$expected_version" || "$actual_version" == "$expected_version-0" ]] || {
+            echo "Unexpected sccache version: $actual_version (recipe: $expected_version)" >&2
+            exit 1
+          }
+          sha256sum "${debs[0]}"
+
+      - name: Commit the validated sccache source pin
+        if: steps.update.outputs.source_changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/sccache/build.sh scripts/rebroad-upstream-packages.json
+          git commit -m "Update ReBroad sccache source pin"
+          git push origin HEAD:master
+
+  publish:
+    needs: [refresh]
+    if: needs.refresh.outputs.needs_publish == 'true'
+    uses: ./.github/workflows/rebroad-packages-apt.yml
+    with:
+      packages: sccache
+    secrets: inherit

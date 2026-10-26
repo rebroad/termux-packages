@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Refresh pinned source commits and package versions from the manifest."""
+import argparse
 import json
 import re
 import subprocess
@@ -7,12 +8,28 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--package",
+    action="append",
+    dest="package_names",
+    help="refresh only this manifest-listed package (may be repeated)",
+)
+args = parser.parse_args()
 manifest_path = root / "scripts/rebroad-upstream-packages.json"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+packages = manifest["packages"]
+if args.package_names:
+    requested = set(args.package_names)
+    available = {package["name"] for package in packages}
+    unknown = requested - available
+    if unknown:
+        raise SystemExit(f"Unknown package(s): {', '.join(sorted(unknown))}")
+    packages = [package for package in packages if package["name"] in requested]
 timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
 changed = []
 
-for package in manifest["packages"]:
+for package in packages:
     name = package["name"]
     repo = package["repository"]
     branch = package["branch"]

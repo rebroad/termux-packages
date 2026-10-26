@@ -10,25 +10,37 @@ expected_fpr="98812D13BCDBF9125D44E0DA8C6E5024C203FC56"
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 manifest="${PACKAGE_MANIFEST:-$script_dir/rebroad-upstream-packages.json}"
 
-mapfile -t package_names < <(python3 - "$manifest" <<'PY'
+mapfile -t manifest_package_names < <(python3 - "$manifest" <<'PY'
 import json
 import sys
 for item in json.load(open(sys.argv[1], encoding="utf-8"))["packages"]:
     print(item["name"])
 PY
 )
-(("${#package_names[@]}" > 0)) || { echo "Package manifest is empty" >&2; exit 1; }
+((${#manifest_package_names[@]} > 0)) || { echo "Package manifest is empty" >&2; exit 1; }
 
-declare -A listed=() seen=()
-for name in "${package_names[@]}"; do
+declare -A listed=() selected=() seen=()
+for name in "${manifest_package_names[@]}"; do
     [[ -z "${listed[$name]-}" ]] || { echo "Duplicate manifest package: $name" >&2; exit 1; }
     listed["$name"]=1
+done
+
+if [[ -n "${PACKAGE_NAMES:-}" ]]; then
+    IFS=',' read -r -a package_names <<< "$PACKAGE_NAMES"
+else
+    package_names=("${manifest_package_names[@]}")
+fi
+((${#package_names[@]} > 0)) || { echo "No packages selected" >&2; exit 1; }
+for name in "${package_names[@]}"; do
+    [[ -n "${listed[$name]-}" ]] || { echo "Package not in manifest: $name" >&2; exit 1; }
+    [[ -z "${selected[$name]-}" ]] || { echo "Duplicate selected package: $name" >&2; exit 1; }
+    selected["$name"]=1
 done
 
 shopt -s nullglob
 debs=("$PACKAGE_DIR"/*.deb)
 if [[ "${#debs[@]}" -ne "${#package_names[@]}" ]]; then
-    echo "Expected ${#package_names[@]} aarch64 packages from the manifest; got ${#debs[@]}" >&2
+    echo "Expected ${#package_names[@]} selected aarch64 packages; got ${#debs[@]}" >&2
     exit 1
 fi
 
@@ -104,5 +116,5 @@ gpg --batch --yes --pinentry-mode loopback --passphrase "${passphrase}" \
 gpg --batch --no-default-keyring --keyring "$apt_keyring" --import ./rebroad-archive-key.asc
 gpgv --keyring "$apt_keyring" dists/stable/InRelease
 
-echo "Signed APT index for ${#package_names[@]} manifest-listed packages"
+echo "Signed APT index for ${#package_names[@]} selected packages"
 sha256sum "${debs[@]}"
