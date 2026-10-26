@@ -3,9 +3,9 @@
     {
       "name": "sccache",
       "repository": "rebroad/sccache",
-      "branch": "in-process-cache-v0.19.0",
-      "source_commit": "c097bfaba06bb21c6248b32c30033df3a45086c0",
-      "version_prefix": "0.19.0+rebroad1"
+      "branch": "main",
+      "source_commit": "69e32fd1bf6cbc2506bc10592ef5f059d8b10a0c",
+      "version_prefix": "0.19.0+rebroad2"
     },
     {
       "name": "htop",
