@@ -1,8 +1,6 @@
-diff --git a/app/src/cli.c b/app/src/cli.c
-index 6986c63e..bab74010 100644
 --- a/app/src/cli.c
 +++ b/app/src/cli.c
-@@ -3437,10 +3437,6 @@ parse_args_with_getopt(struct scrcpy_cli_args *args, int argc, char *argv[],
+@@ -3516,10 +3516,6 @@
              LOGE("Cannot request power off on close if control is disabled");
              return false;
          }
@@ -13,100 +11,9 @@ index 6986c63e..bab74010 100644
          if (opts->keep_active) {
              LOGE("Cannot keep device active if control is disabled");
              return false;
-diff --git a/app/src/scrcpy.c b/app/src/scrcpy.c
-index f5b644a8..47b277b6 100644
---- a/app/src/scrcpy.c
-+++ b/app/src/scrcpy.c
-@@ -386,7 +386,9 @@ scrcpy(struct scrcpy_options *options) {
-         .screen_off_timeout = options->screen_off_timeout,
-         .capture_orientation = options->capture_orientation,
-         .capture_orientation_lock = options->capture_orientation_lock,
--        .control = options->control,
-+        // App startup is a one-shot setup request and remains available with
-+        // --no-control. In that mode, no desktop input processors are created.
-+        .control = options->control || options->start_app,
-         .display_id = options->display_id,
-         .new_display = options->new_display,
-         .display_ime_policy = options->display_ime_policy,
-@@ -593,7 +595,7 @@ scrcpy(struct scrcpy_options *options) {
-     struct sc_mouse_processor *mp = NULL;
-     struct sc_gamepad_processor *gp = NULL;
-
--    if (options->control) {
-+    if (options->control || options->start_app) {
-         static const struct sc_controller_callbacks controller_cbs = {
-             .on_ended = sc_controller_on_ended,
-         };
-@@ -605,7 +607,12 @@ scrcpy(struct scrcpy_options *options) {
-         controller_initialized = true;
-
-         controller = &s->controller;
-+    }
-+
-+    struct sc_uhid_devices *uhid_devices = NULL;
-+    struct sc_keyboard_uhid *uhid_keyboard = NULL;
-
-+    if (options->control) {
- #ifdef HAVE_USB
-         bool use_keyboard_aoa =
-             options->keyboard_input_mode == SC_KEYBOARD_INPUT_MODE_AOA;
-@@ -703,8 +710,6 @@ aoa_complete:
-         assert(options->mouse_input_mode != SC_MOUSE_INPUT_MODE_AOA);
- #endif
-
--        struct sc_keyboard_uhid *uhid_keyboard = NULL;
--
-         if (options->keyboard_input_mode == SC_KEYBOARD_INPUT_MODE_SDK) {
-             sc_keyboard_sdk_init(&s->keyboard_sdk, &s->controller,
-                                  options->key_inject_mode,
-@@ -737,12 +742,13 @@ aoa_complete:
-             gp = &s->gamepad_uhid.gamepad_processor;
-         }
-
--        struct sc_uhid_devices *uhid_devices = NULL;
-         if (uhid_keyboard) {
-             sc_uhid_devices_init(&s->uhid_devices, uhid_keyboard);
-             uhid_devices = &s->uhid_devices;
-         }
-+    }
-
-+    if (controller) {
-         sc_controller_configure(&s->controller, acksync, uhid_devices);
-
-         if (!sc_controller_start(&s->controller)) {
-@@ -751,15 +757,15 @@ aoa_complete:
-         controller_started = true;
-     }
-
--    // There is a controller if and only if control is enabled
--    assert(options->control == !!controller);
-+    // A controller is also used for the one-shot --start-app request.
-+    assert((options->control || options->start_app) == !!controller);
-
-     if (options->window) {
-         struct sc_screen_params screen_params = {
-             .video = options->video_playback,
-             .camera = options->video_source == SC_VIDEO_SOURCE_CAMERA,
-             .flex_display = options->flex_display,
--            .controller = controller,
-+            .controller = options->control ? controller : NULL,
-             .fp = fp,
-             .kp = kp,
-             .mp = mp,
-@@ -884,7 +890,7 @@ aoa_complete:
-         init_sdl_gamepads();
-     }
-
--    if (options->control && options->start_app) {
-+    if (options->start_app) {
-         assert(controller);
-
-         char *name = strdup(options->start_app);
-diff --git a/app/tests/test_cli.c b/app/tests/test_cli.c
-index 6a341b4f..072d3497 100644
 --- a/app/tests/test_cli.c
 +++ b/app/tests/test_cli.c
-@@ -106,6 +106,7 @@ static void test_options2(void) {
+@@ -106,6 +106,7 @@
      char *argv[] = {
          "scrcpy",
          "--no-control",
@@ -114,7 +21,7 @@ index 6a341b4f..072d3497 100644
          "--no-playback",
          "--record", "file.mp4", // cannot enable --no-playback without recording
      };
-@@ -115,6 +116,7 @@ static void test_options2(void) {
+@@ -115,6 +116,7 @@
 
      const struct scrcpy_options *opts = &args.opts;
      assert(!opts->control);
@@ -122,17 +29,15 @@ index 6a341b4f..072d3497 100644
      assert(!opts->video_playback);
      assert(!opts->audio_playback);
      assert(!strcmp(opts->record_filename, "file.mp4"));
-diff --git a/doc/virtual-display.md b/doc/virtual-display.md
-index cc073e1c..47e52829 100644
 --- a/doc/virtual-display.md
 +++ b/doc/virtual-display.md
-@@ -65,6 +65,14 @@ For example:
+@@ -65,6 +65,14 @@
  scrcpy --new-display=1920x1080 --start-app=org.videolan.vlc
  ```
 
 +To start an app while keeping desktop input disabled, combine
-+`--start-app` with `--no-control`. The app launch is a one-time setup request;
-+scrcpy will not forward keyboard, mouse, or touch input:
++`--start-app` with `--no-control`. App startup is a one-time request; scrcpy
++will not forward keyboard, mouse, or touch input:
 +
 +```bash
 +scrcpy --new-display --start-app=com.termux --no-control
