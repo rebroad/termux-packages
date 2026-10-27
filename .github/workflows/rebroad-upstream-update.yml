@@ -9,6 +9,10 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: rebroad-package-source-refresh
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-24.04
@@ -20,7 +24,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update tracked upstream commits
-        run: python3 scripts/rebroad-update-upstreams.py
+        run: python3 scripts/rebroad-update-upstreams.py --package htop
 
       - name: Build and validate changed packages before opening a PR
         shell: bash
