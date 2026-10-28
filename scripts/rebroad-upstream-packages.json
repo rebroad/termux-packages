@@ -13,6 +13,20 @@
       "branch": "main",
       "source_commit": "b282c8a2c0f7d0ecd3c352dd387f05865db6ce9d",
       "version_prefix": "3.6.0-dev+rebroad1"
+    },
+    {
+      "name": "scrcpy",
+      "repository": "rebroad/scrcpy",
+      "branch": "master",
+      "source_commit": "4c9651632a6855ca08d9a0404e140c134aca0a0f",
+      "version_prefix": "5.0.1-20261028+rebroad"
+    },
+    {
+      "name": "termux-exec",
+      "repository": "rebroad/termux-exec-package",
+      "branch": "master",
+      "source_commit": "a53767118143b7156bdcae30e03c00bae8fd491a",
+      "version_prefix": "1:2.5.0"
     }
   ]
 }

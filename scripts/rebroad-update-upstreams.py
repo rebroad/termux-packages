@@ -31,6 +31,10 @@ for package in manifest["packages"]:
         continue
 
     recipe = root / "packages" / name / "build.sh"
+    if not recipe.is_file():
+        recipe = root / "x11-packages" / name / "build.sh"
+    if not recipe.is_file():
+        raise SystemExit(f"No build recipe found for manifest package {name}")
     text = recipe.read_text(encoding="utf-8")
     if old_commit not in text:
         raise SystemExit(f"{recipe}: expected source pin {old_commit} was not found")

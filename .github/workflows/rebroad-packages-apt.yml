@@ -5,6 +5,7 @@ on:
     branches: [master]
     paths:
       - packages/*/build.sh
+      - x11-packages/*/build.sh
       - scripts/rebroad-upstream-packages.json
       - scripts/rebroad-publish-apt.sh
       - .github/workflows/rebroad-packages-apt.yml
@@ -32,7 +33,10 @@ jobs:
           (("${#packages[@]}" > 0)) || { echo "Package manifest is empty" >&2; exit 1; }
           mkdir -p dist
           for package in "${packages[@]}"; do
-            ./scripts/lint-packages.sh "packages/$package/build.sh"
+            recipe="packages/$package/build.sh"
+            [[ -f "$recipe" ]] || recipe="x11-packages/$package/build.sh"
+            [[ -f "$recipe" ]] || { echo "Missing recipe for $package" >&2; exit 1; }
+            ./scripts/lint-packages.sh "$recipe"
             ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 "$package"
           done
           for output_dir in output termux-packages/output; do
@@ -48,7 +52,7 @@ jobs:
             pkg="${debs[0]}"
             [[ "$(dpkg-deb --field "$pkg" Package)" == "$package" ]]
             [[ "$(dpkg-deb --field "$pkg" Architecture)" == aarch64 ]]
-            expected_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^"]+)"?$/\1/p' "packages/$package/build.sh")
+            expected_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^"]+)"?$/\1/p' "$recipe")
             actual_version=$(dpkg-deb --field "$pkg" Version)
             [[ "$actual_version" == "$expected_version" || "$actual_version" == "$expected_version-0" ]] || {
               echo "Unexpected $package version: $actual_version (recipe: $expected_version)" >&2

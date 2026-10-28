@@ -1,15 +1,16 @@
-TERMUX_PKG_HOMEPAGE=https://github.com/termux/termux-exec-package
-TERMUX_PKG_DESCRIPTION="Utils and libraries for Termux exec including a LD_PRELOAD shared library for proper functioning of the Termux execution environment"
+TERMUX_PKG_HOMEPAGE=https://github.com/rebroad/termux-exec-package
+TERMUX_PKG_DESCRIPTION="Termux exec utilities and LD_PRELOAD hooks"
 TERMUX_PKG_LICENSE="Apache-2.0"
-TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_MAINTAINER="@rebroad"
 TERMUX_PKG_VERSION=1:2.5.0
-TERMUX_PKG_REVISION=1
-TERMUX_PKG_SRCURL=https://github.com/termux/termux-exec-package/archive/refs/tags/v${TERMUX_PKG_VERSION:2}.tar.gz
-TERMUX_PKG_SHA256=5c5eeb1565ad4379ce227ee3017f9fe88611c03ca91f00b8a3fadcf6f7396f51
+TERMUX_PKG_REVISION=3
+TERMUX_PKG_SRCURL=git+https://github.com/rebroad/termux-exec-package.git
+TERMUX_PKG_GIT_BRANCH=master
+TERMUX_PKG_SHA256=SKIP_CHECKSUM
 TERMUX_PKG_BUILD_DEPENDS="termux-core-static"
 TERMUX_PKG_ESSENTIAL=true
 TERMUX_PKG_BUILD_IN_SRC=true
-TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_AUTO_UPDATE=false
 TERMUX_PKG_EXTRA_MAKE_ARGS="TERMUX_EXEC_PKG__VERSION=${TERMUX_PKG_VERSION} TERMUX_EXEC_PKG__ARCH=${TERMUX_ARCH} \
 TERMUX__NAME=${TERMUX__NAME} TERMUX__LNAME=${TERMUX__LNAME} \
 TERMUX__REPOS_HOST_ORG_NAME=${TERMUX__REPOS_HOST_ORG_NAME} \
@@ -22,6 +23,14 @@ TERMUX_ENV__SS_TERMUX_APP=${TERMUX_ENV__SS_TERMUX_APP} TERMUX_ENV__S_TERMUX_APP=
 TERMUX_ENV__SS_TERMUX_ROOTFS=${TERMUX_ENV__SS_TERMUX_ROOTFS} TERMUX_ENV__S_TERMUX_ROOTFS=${TERMUX_ENV__S_TERMUX_ROOTFS} \
 TERMUX_ENV__SS_TERMUX_EXEC=${TERMUX_ENV__SS_TERMUX_EXEC} TERMUX_ENV__S_TERMUX_EXEC=${TERMUX_ENV__S_TERMUX_EXEC} \
 TERMUX_ENV__SS_TERMUX_EXEC__TESTS=${TERMUX_ENV__SS_TERMUX_EXEC__TESTS} TERMUX_ENV__S_TERMUX_EXEC__TESTS=${TERMUX_ENV__S_TERMUX_EXEC__TESTS}"
+
+termux_step_post_get_source() {
+	local actual
+	actual=$(git -C "$TERMUX_PKG_SRCDIR" rev-parse HEAD)
+	if [[ "$actual" != "a53767118143b7156bdcae30e03c00bae8fd491a" ]]; then
+		termux_error_exit "ReBroad termux-exec source changed: expected a53767118143b7156bdcae30e03c00bae8fd491a, got $actual"
+	fi
+}
 
 termux_step_install_license() {
 	mkdir -p "$TERMUX_PREFIX/share/doc/$TERMUX_PKG_NAME/licenses"
