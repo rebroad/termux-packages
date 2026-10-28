@@ -72,6 +72,8 @@ yes | $SDK_MANAGER --sdk_root="$ANDROID_HOME" --licenses
 yes | $SDK_MANAGER --sdk_root="$ANDROID_HOME" \
 		"platform-tools" \
 		"build-tools;${TERMUX_ANDROID_BUILD_TOOLS_VERSION}" \
+		"build-tools;30.0.3" \
 		"platforms;android-35" \
+		"platforms;android-33" \
 		"platforms;android-28" \
 		"platforms;android-24"
