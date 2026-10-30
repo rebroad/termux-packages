@@ -69,10 +69,13 @@ jobs:
           sha256sum dist/*.deb
 
       - name: Save native Termux packages for staging
+        run: tar -czf rebroad-termux-aarch64.tar.gz -C dist .
+
+      - name: Upload native Termux packages for staging
         uses: actions/upload-artifact@v4
         with:
           name: rebroad-termux-aarch64
-          path: dist/*.deb
+          path: rebroad-termux-aarch64.tar.gz
           if-no-files-found: error
           retention-days: 30
 
@@ -99,6 +102,9 @@ jobs:
         with:
           name: rebroad-termux-aarch64
           path: package
+
+      - name: Extract native Termux packages
+        run: tar -xzf package/rebroad-termux-aarch64.tar.gz -C package
 
       - name: Stage every listed package in the APT pool
         working-directory: apt-feed
