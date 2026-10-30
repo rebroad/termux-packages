@@ -37,7 +37,7 @@ jobs:
             [[ -f "$recipe" ]] || recipe="x11-packages/$package/build.sh"
             [[ -f "$recipe" ]] || { echo "Missing recipe for $package" >&2; exit 1; }
             ./scripts/lint-packages.sh "$recipe"
-            ./scripts/run-docker.sh -d ./build-package.sh -I -C -a aarch64 "$package"
+            ./scripts/run-docker.sh -d ./build-package.sh -I -C -w -a aarch64 "$package"
           done
           for output_dir in output termux-packages/output; do
             [[ -d "$output_dir" ]] || continue
