@@ -52,6 +52,9 @@ jobs:
             pkg="${debs[0]}"
             [[ "$(dpkg-deb --field "$pkg" Package)" == "$package" ]]
             [[ "$(dpkg-deb --field "$pkg" Architecture)" == aarch64 ]]
+            recipe="packages/$package/build.sh"
+            [[ -f "$recipe" ]] || recipe="x11-packages/$package/build.sh"
+            [[ -f "$recipe" ]] || { echo "Missing recipe for $package" >&2; exit 1; }
             expected_version=$(sed -nE 's/^TERMUX_PKG_VERSION="?([^"]+)"?$/\1/p' "$recipe")
             actual_version=$(dpkg-deb --field "$pkg" Version)
             [[ "$actual_version" == "$expected_version" || "$actual_version" == "$expected_version-0" ]] || {
