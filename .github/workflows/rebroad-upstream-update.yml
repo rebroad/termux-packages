@@ -35,7 +35,7 @@ jobs:
             [[ -f "$recipe" ]] || recipe="x11-packages/$package/build.sh"
             [[ -f "$recipe" ]] || { echo "Missing recipe for $package" >&2; exit 1; }
             ./scripts/lint-packages.sh "$recipe"
-            ./scripts/run-docker.sh -d ./build-package.sh -I -C -w -a aarch64 "$package"
+            ./scripts/run-docker.sh -d ./build-package.sh -f -I -C -w -a aarch64 "$package"
             shopt -s nullglob
             debs=(output/"${package}"_*_aarch64.deb)
             [[ "${#debs[@]}" -eq 1 ]] || { echo "Expected one built ${package} package" >&2; exit 1; }
