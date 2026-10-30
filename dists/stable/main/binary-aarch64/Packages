@@ -8,24 +8,52 @@ Conflicts: htop-legacy
 Breaks: htop-legacy
 Replaces: htop-legacy
 Filename: pool/main/h/htop/htop_3.6.0-dev+rebroad1-0_aarch64.deb
-Size: 131176
-MD5sum: 1cadec7d6c0be2dd2f2ebc42f029c4d1
-SHA1: df8a71e09e791b8896faa25c875391d04d2595ea
-SHA256: e27f7e7439d95da09319c76ad6a50d8da97a8b466250a62faa329ca211456b68
+Size: 131252
+MD5sum: f6295a8427b07578e5c5c21834b25d20
+SHA1: f5bc0706aedc5fd8fa4c9a7ac756f7d845a80fae
+SHA256: c5797c1bd7de70fb528d630293b4d0ce71c6f95a4324472078c67f963c6e5912
 Homepage: https://github.com/rebroad/htop
 Description: Interactive process viewer for Linux (ReBroad fork)
 
 Package: sccache
-Version: 0.19.0+rebroad2
+Version: 0.19.0+rebroad2.20261029105629.gb8166766
 Architecture: aarch64
 Maintainer: @rebroad
 Installed-Size: 16912
 Depends: openssl
-Filename: pool/main/s/sccache/sccache_0.19.0+rebroad2_aarch64.deb
-Size: 5540168
-MD5sum: dd0e55c72f926b36833a5e3161151623
-SHA1: 2a16ae291ce2c42a2b3e22f2519658eda883c13d
-SHA256: c2bce7d550201aa4ecf4dd0b4b09b638d7b936b1a91ef67fd835f7587c2adab6
+Filename: pool/main/s/sccache/sccache_0.19.0+rebroad2.20261029105629.gb8166766_aarch64.deb
+Size: 5542740
+MD5sum: 7ea7b6530785d8ca949fc91e9d307e8c
+SHA1: 6da204ac5a8d02fba4b4c4268c97d91a64624b0a
+SHA256: 01b7ba8baece5400b79cbe449c95028cb55c6ebf241a2f3365e9cc74fb69564c
 Homepage: https://github.com/rebroad/sccache
 Description: ReBroad sccache with daemon-free in-process cache access
+
+Package: scrcpy
+Version: 5.0.1-20261028+rebroad1-0
+Architecture: aarch64
+Maintainer: @rebroad
+Installed-Size: 456
+Depends: android-tools, ffmpeg, libusb, sdl3
+Filename: pool/main/s/scrcpy/scrcpy_5.0.1-20261028+rebroad1-0_aarch64.deb
+Size: 202036
+MD5sum: 0d1633fbb51edc0ce89faec274092553
+SHA1: 965c1fd2c97d37bb8fb793b264768557b0c74613
+SHA256: 3b70a9f31a194dfe0af8a60b4664e513f5654c04231d873e7c89140837d7af58
+Homepage: https://github.com/rebroad/scrcpy
+Description: Provides display and control of Android devices (ReBroad fork)
+
+Package: termux-exec
+Version: 1:2.5.0-3
+Architecture: aarch64
+Essential: yes
+Maintainer: @rebroad
+Installed-Size: 2396
+Filename: pool/main/t/termux-exec/termux-exec_1:2.5.0-3_aarch64.deb
+Size: 322956
+MD5sum: 504beecf3878bf7fe3e3652b93e59e02
+SHA1: bb2ee6e030ae157299f63367e57c9f72193eda2d
+SHA256: 2be0699aa92c42cd23c61aa4debf068138500344655c43f3f48b35ec55f2ca85
+Homepage: https://github.com/rebroad/termux-exec-package
+Description: Termux exec utilities and LD_PRELOAD hooks
 
