@@ -4,7 +4,7 @@
       "name": "sccache",
       "repository": "rebroad/sccache",
       "branch": "main",
-      "source_commit": "69e32fd1bf6cbc2506bc10592ef5f059d8b10a0c",
+      "source_commit": "b8166766ba94489a7a49dd33121893a9e9fc3e06",
       "version_prefix": "0.19.0+rebroad2"
     },
     {
