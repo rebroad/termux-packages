@@ -11,7 +11,7 @@
       "name": "htop",
       "repository": "rebroad/htop",
       "branch": "main",
-      "source_commit": "b282c8a2c0f7d0ecd3c352dd387f05865db6ce9d",
+      "source_commit": "cf25fb357d3fad67232631d34ad4cc8583b60229",
       "version_prefix": "3.6.0-dev+rebroad1"
     },
     {
