@@ -5,24 +5,24 @@ Origin: ReBroad
 Label: ReBroad Termux
 Suite: stable
 Codename: stable
-Date: Fri, 30 Oct 2026 14:24:26 GMT
+Date: Sat, 31 Oct 2026 18:08:50 GMT
 Architectures: aarch64
 Components: main
 Description: ReBroad Termux native packages (experimental)
 SHA256:
- 5f1cc056fb2938eaeebee9de6ecfe57fd42ddb19119685be9c50186d01024936             2090 main/binary-aarch64/Packages
- 5c452e9904ae20881b18925c226da6714b8f5eb85e3cf7aea1102d7f4717ea1c              977 main/binary-aarch64/Packages.gz
+ 98f3697f82c7ea813feb3ba9d47e579a7678ed1e458022207eb58ee4ea80732a             2140 main/binary-aarch64/Packages
+ 6a9854b1c23f04b7eb9eef022a09e747fd25c7589beac015955e42a8b272377e              993 main/binary-aarch64/Packages.gz
 -----BEGIN PGP SIGNATURE-----
 
-iQGzBAEBCgAdFiEEAwD0ES1vXcOP0apLooE8un2sth8FAmrkqJoACgkQooE8un2s
-th+5xAv+PssJYUy49axXCjwrSbru9i6Vbo2FxNLRjMUwwWJ8VTtT9QMGCzKHRZgk
-eEZuoyN0C0KMOOXhEGaXibcODvf4a0sbqXEVGE3x3h9IZCcmS6iDQYQr7qomGI69
-PvBp2jICTAAMnjV32sniRDM3TfVnb4X92KvE+Il3s5oA/1uPvdSf6RM+2DYkW3FW
-xQUOcMpDq4Iz309WSfXv74lT/p3oM++urGmlkee3AQ1KxeXsR+8aX/fkpjdVqHAL
-vvg/tECCNbhsg2Nibaht4lMxbWlNtZ7Uf+LvkI5Chucgzgn5q1xzUTtaSsZqWeJT
-fHW7firuBsOtsxGyZdET5FBvS+NM9K+yRsHDzBcH2jHqVhdoexu97VZfq9ASuu/m
-UqqYN93Oaj1JjOV6r+myXhowcxXzD6gn4GgFvot9VRLx8aCz4u3ejTAUxXvc8zCW
-Pa0ia/wElDSr5lwMccAbB4X49SUAne933LxYKORapdHYohe70YgsGMOZw3BbEsTr
-IxwStoDa
-=P/jb
+iQGzBAEBCgAdFiEEAwD0ES1vXcOP0apLooE8un2sth8FAmrmLrIACgkQooE8un2s
+th+1Egv+PsJ8+adjnhtEwCoDWitK/9XZk9ZTKz3Mv0y1rDxf1J8n/TLdQpxBJ31i
+lZoFpDl70LeV/1orNdbVsp2819MQNnq6thnTjSgHF2aur2sfqVw8GfCLPRH0xLBb
+W4BppdcOReSEJIpLbT539dBlkjLKBmzYDmJDVcGI453cYns9r1x6qwNI356kulKa
+2e/VehtslAiN5rWewI7YyZ5XjUw7svMMWcuLBVEoHC4pfUbbGDw7JjGxDXjvkfGB
+yp2gDNT20l2UX9I793ki+E//M19TmARlv+Q8SoNXY2Yr1MThQqnVAdGUKwMt8oRY
+bAZFolIKOXvOfmxKPBEaLTsjqHKnpV/bhNGp0udBkiJaisst8mZzqpvK5MqBJ17E
+FAbjpUAbgqlSZS6iJhRTZviBpUquy9ot15O2V2T7VJcWjHafs5qBLRV4H+sQLgKa
+5+/ritkAIjZhKiXfSG0zhfcKSM34JKe874mCAZFq51hKPby5/AhMBL/RhFrinZMh
+w0SqgpUx
+=wHEx
 -----END PGP SIGNATURE-----
