@@ -10,6 +10,8 @@ on:
       - scripts/rebroad-publish-apt.sh
       - .github/workflows/rebroad-packages-apt.yml
   workflow_dispatch:
+  repository_dispatch:
+    types: [rebroad-packages-updated]
 
 permissions:
   contents: read

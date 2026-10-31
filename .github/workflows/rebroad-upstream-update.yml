@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
+  actions: write
 
 jobs:
   refresh:
@@ -22,7 +22,7 @@ jobs:
       - name: Update tracked upstream commits
         run: python3 scripts/rebroad-update-upstreams.py
 
-      - name: Build and validate changed packages before opening a PR
+      - name: Build and validate changed packages before publishing
         shell: bash
         run: |
           set -euo pipefail
@@ -56,15 +56,24 @@ jobs:
           done
           sha256sum dist/*.deb
 
-      - name: Open or update a recipe refresh PR
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: automation/rebroad-upstream-refresh
-          delete-branch: true
-          title: "Refresh ReBroad package sources"
-          commit-message: "Refresh ReBroad package sources"
-          body: |
-            This automated update tracks new commits in the upstream branches listed in `scripts/rebroad-upstream-packages.json`.
-            It updates the pinned source commit and monotonically increases the ReBroad package version.
-            Changed packages were linted and built for native Termux aarch64 in the update workflow.
+      - name: Commit validated recipe updates
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- packages/ x11-packages/ scripts/rebroad-upstream-packages.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/ x11-packages/ scripts/rebroad-upstream-packages.json
+          git commit -m "Refresh ReBroad package sources"
+          git push origin HEAD:master
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Start package build and APT publication
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/${GITHUB_REPOSITORY}/dispatches" -f event_type=rebroad-packages-updated

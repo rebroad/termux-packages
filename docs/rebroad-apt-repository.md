@@ -10,7 +10,7 @@ The package index is signed with a **dedicated OpenPGP archive key**, not an
 Android APK certificate. Full fingerprint:
 
 ```
-1ED97E796A59F08B22CE7CACFFF9DB83A50BE6C9
+98812D13BCDBF9125D44E0DA8C6E5024C203FC56
 ```
 
 The feed now contains a signed Android aarch64 `sccache` package. The public
@@ -48,11 +48,13 @@ snapshot support. Linux x86_64 test results are not evidence of native Android
 runtime compatibility or improved performance. The native Termux ARM64 binary is built and published, but its runtime behavior
 has not yet been smoke-tested on an actual Android device.
 
-A one-time signed APT index was published using the rotated key.
-**Future automated APT publication requires two repository-level GitHub Actions secrets** in `rebroad/termux-packages`:
-`REBROAD_APT_GPG_PRIVATE_KEY` (complete ASCII-armored secret key) and
-`REBROAD_APT_GPG_PASSPHRASE` (its passphrase). Never commit either secret. The
-workflow verifies the expected public fingerprint before signing `InRelease`.
+A one-time signed APT index was published using the rotated key. Automated APT
+publication runs from the `Build and stage ReBroad Termux packages` workflow
+after package recipe changes reach `master`. It requires the repository-level
+GitHub Actions secret `REBROAD_APT_GPG_PRIVATE_KEY` (complete ASCII-armored
+secret key). `REBROAD_APT_GPG_PASSPHRASE` is optional for an unencrypted key.
+Never commit either secret. The workflow verifies the expected public
+fingerprint before signing `InRelease`.
 The dedicated `apt-repo` branch is the public, **signed** package index and
 binary storage. Hosted on GitHub raw files; GitHub caches content briefly and
 large .deb blobs cannot exceed GitHub's normal repository file-size limits.
@@ -72,13 +74,12 @@ installation. Then run `pkg update`, `apt-cache policy sccache`,
 
 The original OpenPGP private key is not available for continued signing. A
 replacement archive key is stored outside Git, and its public half is included
-in `apt-repo` and the companion Termux bootstrap. For automated future
-publishing, store the **matching replacement private key** as the
-`REBROAD_APT_GPG_PRIVATE_KEY` GitHub Actions secret and its passphrase as
-`REBROAD_APT_GPG_PASSPHRASE`. GitHub repository Settings → Secrets and
+in `apt-repo` and the companion Termux bootstrap. For automated publishing, store the **matching replacement private key** as
+the `REBROAD_APT_GPG_PRIVATE_KEY` GitHub Actions secret. If encrypted, also
+store its passphrase as `REBROAD_APT_GPG_PASSPHRASE`. GitHub repository Settings → Secrets and
 variables → Actions is the supported manual setup location. Do not publish
 these secrets in source, logs, or issues. The publisher rejects any private
-key not matching fingerprint `1ED97E796A59F08B22CE7CACFFF9DB83A50BE6C9`. Losing this key again
+key not matching fingerprint `98812D13BCDBF9125D44E0DA8C6E5024C203FC56`. Losing this key again
 would require another key rotation, APK rebuild, and user key refresh.
 
 This repository supports `aarch64` first. Expanding to `arm`, `i686`,
