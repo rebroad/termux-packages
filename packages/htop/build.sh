@@ -2,7 +2,7 @@ TERMUX_PKG_HOMEPAGE=https://github.com/rebroad/htop
 TERMUX_PKG_DESCRIPTION="Interactive process viewer for Linux (ReBroad fork)"
 TERMUX_PKG_LICENSE="GPL-2.0"
 TERMUX_PKG_MAINTAINER="@rebroad"
-TERMUX_PKG_VERSION="3.6.0-dev+rebroad1.20261031175237.gcf25fb35"
+TERMUX_PKG_VERSION="3.6.0-dev+rebroad1.20261101112050.gb2e67797"
 TERMUX_PKG_SRCURL=git+https://github.com/rebroad/htop.git
 TERMUX_PKG_GIT_BRANCH=main
 TERMUX_PKG_SHA256=SKIP_CHECKSUM
@@ -18,8 +18,8 @@ TERMUX_PKG_RM_AFTER_INSTALL="share/applications share/pixmaps"
 termux_step_post_get_source() {
 	local actual
 	actual=$(git -C "$TERMUX_PKG_SRCDIR" rev-parse HEAD)
-	if [[ "$actual" != "cf25fb357d3fad67232631d34ad4cc8583b60229" ]]; then
-		termux_error_exit "ReBroad htop source changed: expected cf25fb357d3fad67232631d34ad4cc8583b60229, got $actual"
+	if [[ "$actual" != "b2e677970cf42f7d757223eb5a8b2ccc8dd38748" ]]; then
+		termux_error_exit "ReBroad htop source changed: expected b2e677970cf42f7d757223eb5a8b2ccc8dd38748, got $actual"
 	fi
 }
 
