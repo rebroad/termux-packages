@@ -1,5 +1,5 @@
 Package: htop
-Version: 3.6.0-dev+rebroad1.20261031175237.gcf25fb35-0
+Version: 3.6.0-dev+rebroad1.20261101112050.gb2e67797-0
 Architecture: aarch64
 Maintainer: @rebroad
 Installed-Size: 436
@@ -7,11 +7,11 @@ Depends: libandroid-support, ncurses
 Conflicts: htop-legacy
 Breaks: htop-legacy
 Replaces: htop-legacy
-Filename: pool/main/h/htop/htop_3.6.0-dev+rebroad1.20261031175237.gcf25fb35-0_aarch64.deb
-Size: 133564
-MD5sum: ce2f848a971c032b80defedf4e01b1a1
-SHA1: 58425cccdab988aac4fe2dddb9716645146c5287
-SHA256: 2736133034f615fa87ed99abbb62d1818067a2471f6e735d4b62abd954b80229
+Filename: pool/main/h/htop/htop_3.6.0-dev+rebroad1.20261101112050.gb2e67797-0_aarch64.deb
+Size: 133508
+MD5sum: 345d9b5dc26e82ec3f001898f336f387
+SHA1: 136b27c24c2e67a5fc5a9dd46a0fcdcd44004f49
+SHA256: 749b773d66d4cf633fddf6091993f86485d0c7004ca6890619de058c70e92bdf
 Homepage: https://github.com/rebroad/htop
 Description: Interactive process viewer for Linux (ReBroad fork)
 
@@ -22,10 +22,10 @@ Maintainer: @rebroad
 Installed-Size: 16912
 Depends: openssl
 Filename: pool/main/s/sccache/sccache_0.19.0+rebroad2.20261029105629.gb8166766_aarch64.deb
-Size: 5540584
-MD5sum: 75e7fbba5483dc9259d256472ddc09fc
-SHA1: fc70c1486208ee522a8c5ca434cec1bcb2ae1109
-SHA256: 3ab38e550f1fed80b47c1061e35acc0730093b9205e36f37c34870427fb68581
+Size: 5540568
+MD5sum: 6fc327cdef1f91027517d81a92ba1d99
+SHA1: bd69481144b9020b1dcb16bdcd7296f8fcc108f0
+SHA256: d5275de665f21540bbd40f6c68460af76777f1265ea8aa0c9cd7e884ca42bcff
 Homepage: https://github.com/rebroad/sccache
 Description: ReBroad sccache with daemon-free in-process cache access
 
@@ -36,10 +36,10 @@ Maintainer: @rebroad
 Installed-Size: 456
 Depends: android-tools, ffmpeg, libusb, sdl3
 Filename: pool/main/s/scrcpy/scrcpy_5.0.1-20261028+rebroad1-0_aarch64.deb
-Size: 202152
-MD5sum: 96034d9b518eb638cb9d5393ebbc6fa1
-SHA1: 22461ecdeff43cd939303b138bd4f45c6587411d
-SHA256: 0228f1d8a23d17cba6a8ed9f05721b8a40392e012867c1a89c4ae6e3c7e00d61
+Size: 202128
+MD5sum: 16644e9868e2dc92807ce1951d71f782
+SHA1: 1d7604d1858aecd7ee2f83ab3612005e5d33c6a4
+SHA256: 6cb569916812b2a2f394fc08000a4ffcb93bfe008aff494bd91f7d91e725c41a
 Homepage: https://github.com/rebroad/scrcpy
 Description: Provides display and control of Android devices (ReBroad fork)
 
@@ -50,10 +50,10 @@ Essential: yes
 Maintainer: @rebroad
 Installed-Size: 2396
 Filename: pool/main/t/termux-exec/termux-exec_1:2.5.0-3_aarch64.deb
-Size: 322468
-MD5sum: 5f0bdc118c31b36a56bbc7c507c78a20
-SHA1: e6d49fe27f092379ac535d1d5b83317f3ac906a9
-SHA256: d9bcf6457bd87ae2cadd3ea4d64b61ae7ff8a8732e730de7e6de2e402a04a607
+Size: 323680
+MD5sum: 414988676bb6d79b375c0d0f591a0846
+SHA1: 37d861fff9cbd66cc254c6868c3fb3624ee6975c
+SHA256: c8d0703d99fe49a83dd159b53a34fc3efa24e817ca2d53ce5167a39e4540f17f
 Homepage: https://github.com/rebroad/termux-exec-package
 Description: Termux exec utilities and LD_PRELOAD hooks
 
